@@ -9,4 +9,4 @@ https://www.acmicpc.net/step
 2)조건문
 
 3)반복문
-15552번
+15552번, 10951번

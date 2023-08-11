@@ -150,28 +150,26 @@ int main()
 
 #include <iostream>
 
-using namespace std;
+int main()
+{
+	int N{}, M{}, i{}, j{}, k{};
+	int array[101]{};
 
-int main() {
+	std::cin >> N >> M;
+	for (int num1 = 0; num1 < M; num1++)
+	{
+		std::cin >> i >> j >> k;
+		for (int num2 = i-1; num2 < j; num2++)
+		{
+			array[num2] = k;
+		}
+	}
+	
+	for (int num3 = 0; num3 < N ; num3++)
+	{
+		std::cout << array[num3] << " ";
+	}
 
-  int n, m;
-  int arr[101] = { 0, };
-  int a, b, c;
-
-  cin >> n >> m;
-
-  for(int i = 0; i < m; i++) {
-    cin >> a >> b >> c;
-    for(int k = a; k <= b; k++) {
-      arr[k] = c;
-    }
-  }
-
-  for(int i = 1; i <= n; i++) {
-    cout << arr[i] << ' ';
-  }
-
-  return 0;
 }
 
 ----------------------------------------------------------------------------

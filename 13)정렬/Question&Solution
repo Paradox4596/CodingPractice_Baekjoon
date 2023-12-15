@@ -264,3 +264,49 @@ int main(){
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+09 Question: 1181번
+
+알파벳 소문자로 이루어진 N개의 단어가 들어오면 아래와 같은 조건에 따라 정렬하는 프로그램을 작성하시오.
+
+길이가 짧은 것부터
+길이가 같으면 사전 순으로
+단, 중복된 단어는 하나만 남기고 제거해야 한다.
+----------------------------------------------------------------------------
+09 MySolution: 1181번
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <algorithm>
+#include <vector>
+using namespace std;
+ 
+bool compare(pair<int, int>a, pair<int, int>b) {
+    if (a.second == b.second) {
+        return a.first < b.first;
+    }
+    else {
+        return a.second < b.second;
+    }
+}
+ 
+int main(){
+    int N,x,y;
+    vector<pair<int, int> > v;
+    scanf("%d", &N);
+    
+    for(int i=0; i<N; i++){
+        scanf("%d %d", &x,&y);
+        v.push_back(make_pair(x,y));
+    }
+    
+    sort(v.begin(),v.end(),compare);
+ 
+    for(int i=0; i<N; i++)
+        printf("%d %d\n", v[i].first,v[i].second);
+        
+ 
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

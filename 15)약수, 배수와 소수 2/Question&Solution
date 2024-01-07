@@ -296,3 +296,66 @@ int main() {
 }
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+
+08 Question: 17103번
+
+골드바흐의 추측: 2보다 큰 짝수는 두 소수의 합으로 나타낼 수 있다.
+짝수 N을 두 소수의 합으로 나타내는 표현을 골드바흐 파티션이라고 한다. 짝수 N이 주어졌을 때, 골드바흐 파티션의 개수를 구해보자. 두 소수의 순서만 다른 것은 같은 파티션이다.
+----------------------------------------------------------------------------
+08 MySolution: 17103번
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int n = 1000000;
+vector<bool> isprime(n + 1, true);
+
+void SetPrime()
+{
+    for (int i = 2; i * i <= n; i++)
+    {
+        if (!isprime[i])
+            continue;
+
+        for (int j = i * i; j <= n; j += i)
+            isprime[j] = false;
+    }
+}
+
+int main()
+{
+    SetPrime();
+    int N, n;
+	cin >> N;
+
+	while (N--)
+	{
+        int count = 0;
+		cin >> n;
+        vector<int> v;
+
+		for (int i = 2; i < n; i++)
+		{
+            if (isprime[i])
+                v.push_back(i);
+		}
+
+        for (auto it = v.begin(); it != v.end(); ++it)
+        {
+            int other = n - *it;
+
+            if (other < *it)
+                break;
+
+            if(binary_search(it, v.end(), other))
+                count++;
+        }
+
+        cout << count << '\n';
+	}
+}
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

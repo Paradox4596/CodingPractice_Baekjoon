@@ -463,3 +463,100 @@ int main()
 }
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+09 Question: 28279번
+
+정수를 저장하는 덱을 구현한 다음, 입력으로 주어지는 명령을 처리하는 프로그램을 작성하시오.
+
+명령은 총 여덟 가지이다.
+
+1 X: 정수 X를 덱의 앞에 넣는다. (1 ≤ X ≤ 100,000)
+2 X: 정수 X를 덱의 뒤에 넣는다. (1 ≤ X ≤ 100,000)
+3: 덱에 정수가 있다면 맨 앞의 정수를 빼고 출력한다. 없다면 -1을 대신 출력한다.
+4: 덱에 정수가 있다면 맨 뒤의 정수를 빼고 출력한다. 없다면 -1을 대신 출력한다.
+5: 덱에 들어있는 정수의 개수를 출력한다.
+6: 덱이 비어있으면 1, 아니면 0을 출력한다.
+7: 덱에 정수가 있다면 맨 앞의 정수를 출력한다. 없다면 -1을 대신 출력한다.
+8: 덱에 정수가 있다면 맨 뒤의 정수를 출력한다. 없다면 -1을 대신 출력한다.
+----------------------------------------------------------------------------
+09 MySolution: 28279번
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <deque>
+#include <algorithm>
+#define FASTIO cin.tie(0); cout.tie(0); ios::sync_with_stdio(false);
+
+using namespace std;
+int N, C, X;
+deque<int> DQ;
+
+void input() {
+    cin >> N;
+    while (N--) {
+        cin >> C;
+        if (C == 1) {
+            cin >> X;
+            DQ.push_front(X);
+        }
+        else if (C == 2) {
+            cin >> X;
+            DQ.push_back(X);
+        }
+        else if (C == 3) {
+            if (DQ.empty()) {
+                cout << "-1\n";
+            }
+            else {
+                cout << DQ.front() << "\n";
+                DQ.pop_front();
+            }
+        }
+        else if (C == 4) {
+            if (DQ.empty()) {
+                cout << "-1\n";
+            }
+            else {
+                cout << DQ.back() << "\n";
+                DQ.pop_back();
+            }
+        }
+        else if (C == 5) {
+            cout << (int)DQ.size() << "\n";
+        }
+        else if (C == 6) {
+            if (DQ.empty()) {
+                cout << "1\n";
+            }
+            else {
+                cout << "0\n";
+            }
+        }
+        else if (C == 7) {
+            if (DQ.empty()) {
+                cout << "-1\n";
+            }
+            else {
+                cout << DQ.front() << "\n";
+            }
+        }
+        else if (C == 8) {
+            if (DQ.empty()) {
+                cout << "-1\n";
+            }
+            else {
+                cout << DQ.back() << "\n";
+            }
+        }
+    };
+}
+
+int main() {
+    FASTIO
+    input();
+
+    return 0;
+}
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

@@ -5,32 +5,31 @@
 01 MySolution: 11659번
 
 #include <iostream>
+#include <vector>
 using namespace std;
 
-int arr[41] = {0};
-int n, cnt1 = 0, cnt2 = 0;
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(0);
+	cout.tie(0);
 
-int fib(int N) {
-    if (N == 1 || N == 2) {
-      cnt1++;
-      return 1;  
-    }
-    else return (fib(N - 1) + fib(N - 2));
-}
+	int n, m;
+	cin >> n >> m;
+	vector<long> dp(n + 1);
+	dp[0] = 0;
+	for (int i = 1; i <= n; i++) {
+		long num;
+		cin >> num;
+		dp[i] = dp[i - 1] + num;
+	}
+	for (int i = 0; i < m; i++) {
+		int s, e;
+		cin >> s >> e;
+		cout << dp[e] - dp[s - 1]<<'\n';
+	}
 
-int main(){
-  
-  cin>>n;
-  
-  fib(n);
-  
-  arr[1] = arr[2] = 1;
-  for(int i=3;i<=n;i++){
-    arr[i] = arr[i-1] + arr[i-2];
-    cnt2++;
-  }
-  cout<<cnt1<<" "<<cnt2;
-  return 0;
+
+	return 0;
 }
 
 ----------------------------------------------------------------------------

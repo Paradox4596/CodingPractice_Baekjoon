@@ -93,3 +93,78 @@ int main() {
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+03 Question: 11286번
+
+절댓값 힙은 다음과 같은 연산을 지원하는 자료구조이다.
+
+배열에 정수 x (x ≠ 0)를 넣는다.
+배열에서 절댓값이 가장 작은 값을 출력하고, 그 값을 배열에서 제거한다. 절댓값이 가장 작은 값이 여러개일 때는, 가장 작은 수를 출력하고, 그 값을 배열에서 제거한다.
+프로그램은 처음에 비어있는 배열에서 시작하게 된다.
+----------------------------------------------------------------------------
+03 MySolution: 11286번
+
+#include <iostream>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+struct compare
+{
+    bool operator()(int iNum1, int iNum2)
+    {
+        int iFirst = abs(iNum1);
+        int iSecond = abs(iNum2);
+
+        if (iFirst == iSecond)
+        {
+            return iNum1 > iNum2;
+        }
+        else
+        {
+            return iFirst > iSecond;
+        }
+    }
+};
+
+int iN = 0;
+
+priority_queue<int, vector<int>, compare> que;
+
+int main(void)
+{
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    cin >> iN;
+
+    for (int i = 0; i < iN; ++i)
+    {
+        int iNumber = 0;
+
+        cin >> iNumber;
+
+        if (iNumber == 0)
+        {
+            if (que.empty())
+                cout << "0" << '\n';
+            else
+            {
+                cout << que.top() << '\n';
+                que.pop();
+            }
+        }
+        else
+        {
+            que.emplace(iNumber);
+
+        }
+    }
+
+    return 0;
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

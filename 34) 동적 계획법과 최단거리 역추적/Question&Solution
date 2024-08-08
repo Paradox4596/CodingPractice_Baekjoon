@@ -456,77 +456,184 @@ int main(void) {
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
+07 Question: 9019번
 
-06 Question: 13913번
+네 개의 명령어 D, S, L, R 을 이용하는 간단한 계산기가 있다. 이 계산기에는 레지스터가 하나 있는데, 이 레지스터에는 0 이상 10,000 미만의 십진수를 저장할 수 있다. 각 명령어는 이 레지스터에 저장된 n을 다음과 같이 변환한다. n의 네 자릿수를 d1, d2, d3, d4라고 하자(즉 n = ((d1 × 10 + d2) × 10 + d3) × 10 + d4라고 하자)
 
-수빈이는 동생과 숨바꼭질을 하고 있다. 수빈이는 현재 점 N(0 ≤ N ≤ 100,000)에 있고, 동생은 점 K(0 ≤ K ≤ 100,000)에 있다. 수빈이는 걷거나 순간이동을 할 수 있다. 만약, 수빈이의 위치가 X일 때 걷는다면 1초 후에 X-1 또는 X+1로 이동하게 된다. 순간이동을 하는 경우에는 1초 후에 2*X의 위치로 이동하게 된다.
+D: D 는 n을 두 배로 바꾼다. 결과 값이 9999 보다 큰 경우에는 10000 으로 나눈 나머지를 취한다. 그 결과 값(2n mod 10000)을 레지스터에 저장한다.
+S: S 는 n에서 1 을 뺀 결과 n-1을 레지스터에 저장한다. n이 0 이라면 9999 가 대신 레지스터에 저장된다.
+L: L 은 n의 각 자릿수를 왼편으로 회전시켜 그 결과를 레지스터에 저장한다. 이 연산이 끝나면 레지스터에 저장된 네 자릿수는 왼편부터 d2, d3, d4, d1이 된다.
+R: R 은 n의 각 자릿수를 오른편으로 회전시켜 그 결과를 레지스터에 저장한다. 이 연산이 끝나면 레지스터에 저장된 네 자릿수는 왼편부터 d4, d1, d2, d3이 된다.
+위에서 언급한 것처럼, L 과 R 명령어는 십진 자릿수를 가정하고 연산을 수행한다. 예를 들어서 n = 1234 라면 여기에 L 을 적용하면 2341 이 되고 R 을 적용하면 4123 이 된다.
 
-수빈이와 동생의 위치가 주어졌을 때, 수빈이가 동생을 찾을 수 있는 가장 빠른 시간이 몇 초 후인지 구하는 프로그램을 작성하시오.
+여러분이 작성할 프로그램은 주어진 서로 다른 두 정수 A와 B(A ≠ B)에 대하여 A를 B로 바꾸는 최소한의 명령어를 생성하는 프로그램이다. 예를 들어서 A = 1234, B = 3412 라면 다음과 같이 두 개의 명령어를 적용하면 A를 B로 변환할 수 있다.
+
+1234 →L 2341 →L 3412
+1234 →R 4123 →R 3412
+
+따라서 여러분의 프로그램은 이 경우에 LL 이나 RR 을 출력해야 한다.
+
+n의 자릿수로 0 이 포함된 경우에 주의해야 한다. 예를 들어서 1000 에 L 을 적용하면 0001 이 되므로 결과는 1 이 된다. 그러나 R 을 적용하면 0100 이 되므로 결과는 100 이 된다.
 ----------------------------------------------------------------------------
-06 MySolution: 13913번
+07 MySolution: 9019번
 
-#include<iostream>
-#include<queue>
-#include<vector>
+#include <queue>
+#include <iostream>
+#include <string>
+#include <cstring>
+
 using namespace std;
-queue<pair <int, int>> q;
-bool check[1000001];
-int parent[1000001];
-int N, K;
-int ans;
-vector<int> v;
-vector<int> path;
-void bfs() {
- 
-    while (!q.empty()) {
-        int x = q.front().first;
-        int time = q.front().second;
-        check[x] = true;
+
+int a, b;
+bool visited[10000];
+
+void bfs()
+{
+    queue<pair<int, string>> q;
+    q.push(make_pair(a, ""));
+    visited[a] = true;
+
+    while (!q.empty())
+    {
+        int cur_num = q.front().first;
+        string cur_op = q.front().second;
         q.pop();
-        if (x == K) {
-            int idx = x;
-            while (idx != N) {
-                path.push_back(idx);
-                idx = parent[idx];
-            }
-            cout << time << "\n";
-            break;
+
+        if (cur_num == b)
+        {
+            cout << cur_op << '\n';
+            return;
         }
 
-        if (x-1 >= 0 && x-1 <= 200000 && check[x-1] == false) {
-            q.push(make_pair(x-1, time + 1));
-            check[x-1] = true;
-            parent[x-1] = x;
+        int D, S, L, R, temp;
+        D = (cur_num * 2) % 10000;
+        if (!visited[D])
+        {
+            visited[D] = true;
+            q.push(make_pair(D, cur_op + "D"));
         }
 
- 
-        if (x+1 >= 0 && x+1 <= 200000 && check[x+1] == false) {
-            q.push(make_pair(x+1, time + 1));;
-            check[x+1] = true;
-            parent[x+1] = x;
+        S = cur_num - 1 < 0 ? 9999 : cur_num - 1;
+        if (!visited[S])
+        {
+            visited[S] = true;
+            q.push(make_pair(S, cur_op + "S"));
         }
 
- 
-        if (x*2 >= 0 && x * 2 <= 200000 && check[x * 2] == false) {
-            q.push(make_pair(x * 2, time + 1));
-            check[x * 2] = true;
-            parent[x * 2] = x;
+        L = (cur_num % 1000) * 10 + (cur_num / 1000);
+        if (!visited[L])
+        {
+            visited[L] = true;
+            q.push(make_pair(L, cur_op + "L"));
+        }
+
+        R = cur_num / 10 + (cur_num % 10) * 1000;
+        if (!visited[R])
+        {
+            visited[R] = true;
+            q.push(make_pair(R, cur_op + "R"));
         }
     }
 }
- 
- 
- 
- 
-int main(void) {
-    cin >> N >> K;
-    q.push(make_pair(N, 0));
-    bfs();
-    cout << N<< ' ';
-    for (int i = path.size() - 1; i >= 0; i--)
-        cout << path[i] << ' ';
- 
+
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    int T;
+    cin >> T;
+
+    while (T--)
+    {
+        cin >> a >> b;
+        memset(visited, false, sizeof(visited)); 
+        bfs();
+    }
+
     return 0;
 }
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+
+08 Question: 11779번
+
+n(1≤n≤1,000)개의 도시가 있다. 그리고 한 도시에서 출발하여 다른 도시에 도착하는 m(1≤m≤100,000)개의 버스가 있다. 우리는 A번째 도시에서 B번째 도시까지 가는데 드는 버스 비용을 최소화 시키려고 한다. 그러면 A번째 도시에서 B번째 도시 까지 가는데 드는 최소비용과 경로를 출력하여라. 항상 시작점에서 도착점으로의 경로가 존재한다.
+----------------------------------------------------------------------------
+08 MySolution: 11779번
+
+#define INF 2100000000
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+int N, M;
+vector<pair<int, int>> arr[1002];
+int value[1002];
+int prev_arr[1002];
+
+void dijkstra(int start) {
+	for (int i = 1; i <= N; i++) value[i] = INF;
+	value[start] = 0;
+	priority_queue<pair<int, int>> pq;
+	pq.push({ 0,start });
+
+	while (!pq.empty()) {
+		int str = pq.top().second;
+		int val = -pq.top().first;
+		pq.pop();
+
+		if (val > value[str]) continue;
+
+		for (int i = 0; i < arr[str].size(); i++) {
+			int weight = val + arr[str][i].second;
+			int dest = arr[str][i].first;
+			if (value[dest] <= weight) {
+				continue;
+			}
+			prev_arr[dest] = str;
+			value[dest] = weight;
+			pq.push({ -weight,dest });
+		}
+	}
+}
+
+int main()
+{
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL); cout.tie(NULL);
+
+	cin >> N >> M;
+	for (int i = 0; i < M; i++) {
+		int str, dest, val;
+		cin >> str >> dest >> val;
+		arr[str].push_back({ dest,val });
+	}
+
+	int str, dest;
+	cin >> str >> dest;
+	dijkstra(str);
+
+	cout << value[dest] << "\n";
+
+	vector<int> V;
+	V.push_back(dest);
+	int temp = prev_arr[dest];
+	while (temp != str) {
+		V.push_back(temp);
+		temp = prev_arr[temp];
+	}
+	V.push_back(str);
+
+	cout << V.size() << "\n";
+	for (int i = V.size() - 1; i >= 0; i--) {
+		cout << V[i] << " ";
+	}
+
+}
+
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------

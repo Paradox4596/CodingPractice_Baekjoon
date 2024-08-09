@@ -637,3 +637,83 @@ int main()
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+08 Question: 11779번
+
+n(1≤n≤1,000)개의 도시가 있다. 그리고 한 도시에서 출발하여 다른 도시에 도착하는 m(1≤m≤100,000)개의 버스가 있다. 우리는 A번째 도시에서 B번째 도시까지 가는데 드는 버스 비용을 최소화 시키려고 한다. 그러면 A번째 도시에서 B번째 도시 까지 가는데 드는 최소비용과 경로를 출력하여라. 항상 시작점에서 도착점으로의 경로가 존재한다.
+----------------------------------------------------------------------------
+08 MySolution: 11779번
+
+#define INF 2100000000
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+int N, M;
+vector<pair<int, int>> arr[1002];
+int value[1002];
+int prev_arr[1002];
+
+void dijkstra(int start) {
+	for (int i = 1; i <= N; i++) value[i] = INF;
+	value[start] = 0;
+	priority_queue<pair<int, int>> pq;
+	pq.push({ 0,start });
+
+	while (!pq.empty()) {
+		int str = pq.top().second;
+		int val = -pq.top().first;
+		pq.pop();
+
+		if (val > value[str]) continue;
+
+		for (int i = 0; i < arr[str].size(); i++) {
+			int weight = val + arr[str][i].second;
+			int dest = arr[str][i].first;
+			if (value[dest] <= weight) {
+				continue;
+			}
+			prev_arr[dest] = str;
+			value[dest] = weight;
+			pq.push({ -weight,dest });
+		}
+	}
+}
+
+int main()
+{
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL); cout.tie(NULL);
+
+	cin >> N >> M;
+	for (int i = 0; i < M; i++) {
+		int str, dest, val;
+		cin >> str >> dest >> val;
+		arr[str].push_back({ dest,val });
+	}
+
+	int str, dest;
+	cin >> str >> dest;
+	dijkstra(str);
+
+	cout << value[dest] << "\n";
+
+	vector<int> V;
+	V.push_back(dest);
+	int temp = prev_arr[dest];
+	while (temp != str) {
+		V.push_back(temp);
+		temp = prev_arr[temp];
+	}
+	V.push_back(str);
+
+	cout << V.size() << "\n";
+	for (int i = V.size() - 1; i >= 0; i--) {
+		cout << V[i] << " ";
+	}
+
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

@@ -638,81 +638,98 @@ int main()
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
-08 Question: 11779번
+09 Question: 11780번
 
-n(1≤n≤1,000)개의 도시가 있다. 그리고 한 도시에서 출발하여 다른 도시에 도착하는 m(1≤m≤100,000)개의 버스가 있다. 우리는 A번째 도시에서 B번째 도시까지 가는데 드는 버스 비용을 최소화 시키려고 한다. 그러면 A번째 도시에서 B번째 도시 까지 가는데 드는 최소비용과 경로를 출력하여라. 항상 시작점에서 도착점으로의 경로가 존재한다.
+n(1 ≤ n ≤ 100)개의 도시가 있다. 그리고 한 도시에서 출발하여 다른 도시에 도착하는 m(1 ≤ m ≤ 100,000)개의 버스가 있다. 각 버스는 한 번 사용할 때 필요한 비용이 있다.
+
+모든 도시의 쌍 (A, B)에 대해서 도시 A에서 B로 가는데 필요한 비용의 최솟값을 구하는 프로그램을 작성하시오.
 ----------------------------------------------------------------------------
-08 MySolution: 11779번
+09 MySolution: 11780번
 
-#define INF 2100000000
 #include <iostream>
-#include <queue>
 #include <vector>
+#include <algorithm>
+
 using namespace std;
 
+const int INF = 987654321;
+
 int N, M;
-vector<pair<int, int>> arr[1002];
-int value[1002];
-int prev_arr[1002];
+int dist[101][101], before[101][101];
 
-void dijkstra(int start) {
-	for (int i = 1; i <= N; i++) value[i] = INF;
-	value[start] = 0;
-	priority_queue<pair<int, int>> pq;
-	pq.push({ 0,start });
+void FloydWarshall() {
+    for (int k=1; k<=N; k++) {
+        for (int i=1; i<=N; i++) {
+            for (int j=1; j<=N; j++) {
+                if (dist[i][k] + dist[k][j] < dist[i][j]) {
+                    before[i][j] = k;
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                }
+            }
+        }
+    }
+}
 
-	while (!pq.empty()) {
-		int str = pq.top().second;
-		int val = -pq.top().first;
-		pq.pop();
-
-		if (val > value[str]) continue;
-
-		for (int i = 0; i < arr[str].size(); i++) {
-			int weight = val + arr[str][i].second;
-			int dest = arr[str][i].first;
-			if (value[dest] <= weight) {
-				continue;
-			}
-			prev_arr[dest] = str;
-			value[dest] = weight;
-			pq.push({ -weight,dest });
-		}
-	}
+vector<int> getRoute(int s, int e) {
+    if (before[s][e] == s) return {s, e};
+    
+    vector<int> route;
+    auto l = getRoute(s, before[s][e]);
+    auto r = getRoute(before[s][e], e);
+    
+    for (auto node: l) route.push_back(node);
+    route.pop_back();
+    for (auto node: r) route.push_back(node);
+    
+    return route;
 }
 
 int main()
 {
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL); cout.tie(NULL);
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+    
+    for (int i=1; i<=100; i++) {
+        for (int j=1; j<=100; j++) {
+            dist[i][j] = (i == j) ? 0 : INF;
+        }
+    }
+    
+    cin >> N >> M;
+    for (int i=0; i<M; i++) {
+        int a, b, c; cin >> a >> b >> c;
+        if (c < dist[a][b]) {
+            dist[a][b] = c;
+            before[a][b] = a;
+        }
+    }
+    
+    FloydWarshall();
+    
+    for (int s=1; s<=N; s++) {
+        for (int e=1; e<=N; e++) {
+            if (dist[s][e] == INF) cout << 0 << " ";
+            else cout << dist[s][e] << " ";
+        }
+        cout << "\n";
+    }
+    
+    for (int i=1; i<=N; i++) {
+        for (int j=1; j<=N; j++) {
+            if (dist[i][j] == INF || i == j) {
+                cout << 0;
+            }
+            else {
+                vector<int> route = getRoute(i, j);
+                cout << route.size() << " ";
+                for (auto node: route) cout << node << " ";
+            }
+            
+            cout << "\n";
+        }
+    }
 
-	cin >> N >> M;
-	for (int i = 0; i < M; i++) {
-		int str, dest, val;
-		cin >> str >> dest >> val;
-		arr[str].push_back({ dest,val });
-	}
-
-	int str, dest;
-	cin >> str >> dest;
-	dijkstra(str);
-
-	cout << value[dest] << "\n";
-
-	vector<int> V;
-	V.push_back(dest);
-	int temp = prev_arr[dest];
-	while (temp != str) {
-		V.push_back(temp);
-		temp = prev_arr[temp];
-	}
-	V.push_back(str);
-
-	cout << V.size() << "\n";
-	for (int i = V.size() - 1; i >= 0; i--) {
-		cout << V[i] << " ";
-	}
-
+    return 0;
 }
 
 ----------------------------------------------------------------------------

@@ -178,3 +178,74 @@ int main(){
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+04 Question: 1991번
+
+이진 트리를 입력받아 전위 순회(preorder traversal), 중위 순회(inorder traversal), 후위 순회(postorder traversal)한 결과를 출력하는 프로그램을 작성하시오.
+
+
+
+예를 들어 위와 같은 이진 트리가 입력되면,
+
+전위 순회한 결과 : ABDCEFG // (루트) (왼쪽 자식) (오른쪽 자식)
+중위 순회한 결과 : DBAECFG // (왼쪽 자식) (루트) (오른쪽 자식)
+후위 순회한 결과 : DBEGFCA // (왼쪽 자식) (오른쪽 자식) (루트)
+가 된다.
+----------------------------------------------------------------------------
+04 MySolution: 1991번
+
+#include <iostream>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+int V;
+vector<pair<int,int>> v[100001];
+bool visited[100001] = {false,};
+int selected;
+int dist = 0;
+
+void dfs(int x, int cnt){
+
+
+    if(dist < cnt){
+        selected = x;
+        dist = cnt;
+    }
+
+
+    for(int i = 0; i < v[x].size(); i++){
+        int nx = v[x][i].first;
+        int cost = v[x][i].second;
+        if(!visited[nx]){
+            visited[nx] = true;
+            dfs(nx,cnt+cost);
+            visited[nx] = false;
+        }
+    }
+}
+int main(){
+    cin.tie(0); cout.tie(0); ios::sync_with_stdio(false);
+    cin >> V;
+    for(int i = 1; i <= V; i++){
+        int s, e, c;
+        cin >> s;
+        while(true){
+            cin >> e;
+            if(e == -1) break;
+            cin >> c;
+            v[s].push_back({e,c});
+        }
+    }
+    visited[1] = true;
+    dfs(1,0);
+    fill(visited,visited+100001,false);
+    dist = 0;
+    visited[selected] = true; 
+    dfs(selected,0);
+    cout << dist;
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

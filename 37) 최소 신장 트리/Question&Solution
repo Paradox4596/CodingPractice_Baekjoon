@@ -247,3 +247,110 @@ int main()
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+05 Question: 6497번
+
+성진이는 한 도시의 시장인데 거지라서 전력난에 끙끙댄다. 그래서 모든 길마다 원래 켜져 있던 가로등 중 일부를 소등하기로 하였다. 길의 가로등을 켜 두면 하루에 길의 미터 수만큼 돈이 들어가는데, 일부를 소등하여 그만큼의 돈을 절약할 수 있다.
+
+그러나 만약 어떤 두 집을 왕래할 때, 불이 켜져 있지 않은 길을 반드시 지나야 한다면 위험하다. 그래서 도시에 있는 모든 두 집 쌍에 대해, 불이 켜진 길만으로 서로를 왕래할 수 있어야 한다.
+
+위 조건을 지키면서 절약할 수 있는 최대 액수를 구하시오.
+----------------------------------------------------------------------------
+05 MySolution: 6497번
+
+#include<iostream>
+#include<algorithm>
+using namespace std;
+
+
+int m, n;
+
+pair<long, pair<int, int>> edge[200001];
+int parents[200001];
+
+long res=0;
+int edgenum = 0;
+
+
+int FindRoot(int x)
+{
+	if (x == parents[x])
+		return x;
+	return parents[x] = FindRoot(parents[x]);
+}
+
+void Merge(int x, int y)
+{
+	x = FindRoot(x);
+	y = FindRoot(y);
+
+	if (x == y)
+		return;
+	parents[x] = y;
+}
+
+
+int main()
+{
+
+
+	int x, y, z;
+
+
+	while(1)
+	{
+		edgenum = 0;
+		res = 0;
+
+
+		cin >> m >> n;
+
+		
+		if (m == 0 && n == 0)
+			break;
+
+
+		for (int i = 0; i <= n; i++)
+		{
+			parents[i] = i;
+			edge[i] = { 0,{0,0} };
+		}
+
+
+
+		for (int i = 0; i < n; i++) 
+		{
+			cin >> x >> y >> z;
+
+			edge[i] = { z,{x,y} };
+			res += z;
+
+		}
+
+
+		sort(edge, edge + n);
+
+
+		for (int i = 0; i < n; i++)
+		{
+			if (FindRoot(edge[i].second.first) == FindRoot(edge[i].second.second))
+				continue;
+
+			Merge(edge[i].second.first, edge[i].second.second);
+			res -= edge[i].first;
+
+			edgenum++;
+			if (edgenum == m - 1)
+				break;
+		}
+
+		cout << res<<'\n';
+
+
+	}
+
+}
+
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

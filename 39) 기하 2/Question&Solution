@@ -46,49 +46,112 @@ int main()
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
-02 Question: 2166번
+02 Question: 11758번
 
-2차원 평면상에 N(3 ≤ N ≤ 10,000)개의 점으로 이루어진 다각형이 있다. 이 다각형의 면적을 구하는 프로그램을 작성하시오.
+2차원 좌표 평면 위에 있는 점 3개 P1, P2, P3가 주어진다. P1, P2, P3를 순서대로 이은 선분이 어떤 방향을 이루고 있는지 구하는 프로그램을 작성하시오.
 ----------------------------------------------------------------------------
-02 MySolution: 2166번
+02 MySolution: 11758번
 
 #include <iostream>
-#include <algorithm>
-#include <vector>
-
 using namespace std;
 
-int n;
-vector<pair<int, int>> v;
+struct pos 
+{
+    int x,y;
+};
 
-long double solve(int i, int j) {
-	long double a = v[0].first, b = v[0].second;
-	long double c = v[i].first, d = v[i].second;
-	long double e = v[j].first, f = v[j].second;
+int main(int argc, const char * argv[]) 
+{
+    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
 
-	return (a * d + c * f + e * b - c * b - e * d - a * f) / 2;
+    pos a,b,c;
+    cin>>a.x>>a.y;
+    cin>>b.x>>b.y;
+    cin>>c.x>>c.y;
+
+    long long temp = a.x * b.y + b.x * c.y + c.x * a.y - (b.x * a.y + c.x * b.y + a.x * c.y);
+
+    if (temp < 0)
+        cout<<"-1";
+    else if (temp > 0)
+        cout<<"1";
+    else
+        cout<<"0";
+
+    return 0;
 }
 
-int main()
-{
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+
+03 Question: 25308번
+
+게임 캐릭터의 능력치를 한 눈에 보기 좋게 나타내는 방법으로 방사형 그래프가 있다. 캐릭터는 8개의 능력치를 갖고 있고 각 능력치를 
+$a_1, a_2, \cdots, a_8$이라고 하면, 그래프는 팔각형 형태이고 
+$k$번째 꼭짓점은 원점을 기준으로 
+$45\times k$도 방향으로 
+$a_k$만큼 떨어져 있다.
+
+
+
+방사형 그래프를 사용하면 능력치가 얼마나 고르게 분포되어 있는지 쉽게 알 수 있다. 만약 모든 능력치가 동일하다면 정다각형 형태가 되고, 한 능력치가 다른 능력치에 비해 현저히 낮으면 오목 다각형이 된다. 많은 사람들은 방사형 그래프를 볼록 다각형, 즉 모든 내각이 
+$180°$ 이하인 다각형으로 만들어 자신의 약점을 없애기 위해 노력한다.
+
+시루는 자신의 그래프를 볼록 다각형으로 바꾸고 싶지만, 능력치를 올리는 것은 매우 귀찮기 때문에 한 가지 꼼수를 생각해냈다. 바로 능력치를 나열하는 순서를 바꾸는 것이다. 예를 들어, 
+$\lbrace 6,7,7,8,9,10,11,13 \rbrace$ 순서대로 나열하면 오목 다각형이 되지만, 순서를 바꿔 
+$\lbrace 7,6,7,8,9,10,11,13 \rbrace$ 순서대로 나열하면 볼록 다각형이 된다.
+
+
+
+능력치를 나열하는 순서에 따라 오목 다각형이 될 수도, 볼록 다각형이 될 수도 있기 때문에, 시루는 능력치를 잘 배열해서 볼록 다각형이 되는 경우의 수가 궁금해졌다. 볼록 다각형을 만드는 경우의 수를 구해보자.
+----------------------------------------------------------------------------
+03 MySolution: 25308번
+
+#include <iostream>
+#include <vector>
+using namespace std;
+typedef long long ll;
+
+int ans = 0;
+ll arr[8];
+bool visited[8];
+vector<ll> vec;
+
+bool anglechk(ll& x, ll& y, ll& z) {
+	return (x + z) * (x + z) * y * y >= 2 * x * x * z * z;
+}
+
+void func(int cnt) {
+	if (cnt == 8) {
+		if (anglechk(vec[0], vec[1], vec[2]) &&
+			anglechk(vec[1], vec[2], vec[3]) &&
+			anglechk(vec[2], vec[3], vec[4]) &&
+			anglechk(vec[3], vec[4], vec[5]) &&
+			anglechk(vec[4], vec[5], vec[6]) &&
+			anglechk(vec[5], vec[6], vec[7]) &&
+			anglechk(vec[6], vec[7], vec[0]) &&
+			anglechk(vec[7], vec[0], vec[1])) ans++;
+		return;
+	}
+	for (int i = 0; i < 8; i++) {
+		if (visited[i]) continue;
+		visited[i] = 1;
+		vec.emplace_back(arr[i]);
+		func(cnt + 1);
+		vec.pop_back();
+		visited[i] = 0;
+	}
+}
+
+int main() {
 	ios::sync_with_stdio(0);
 	cin.tie(0);
-	cout.tie(0);
 
-	cin >> n;
-	for (int i = 0; i < n; i++) {
-		int a, b;
-		cin >> a >> b;
-		v.push_back({ a, b });
-	}
+	for (int i = 0; i < 8; i++) cin >> arr[i];
 
-	long double ans = 0;
-	for (int i = 1; i < n - 1; i++) {
-		ans += solve(i, i + 1);
-	}
-	cout << fixed;
-	cout.precision(1);
-	cout << abs(ans) << endl;
+	func(0);
+
+	cout << ans;
 }
 
 ----------------------------------------------------------------------------

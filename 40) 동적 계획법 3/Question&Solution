@@ -267,79 +267,55 @@ int main() {
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
-05 Question: 1086번
+05 Question: 17404번
 
-박성원은 이 문제를 풀지 못했다.
+RGB거리에는 집이 N개 있다. 거리는 선분으로 나타낼 수 있고, 1번 집부터 N번 집이 순서대로 있다.
 
-서로 다른 정수로 이루어진 집합이 있다. 이 집합의 순열을 합치면 큰 정수 하나를 만들 수 있다. 예를 들어, {5221,40,1,58,9}로 5221401589를 만들 수 있다. 합친수가 정수 K로 나누어 떨어지는 순열을 구하는 프로그램을 작성하시오.
+집은 빨강, 초록, 파랑 중 하나의 색으로 칠해야 한다. 각각의 집을 빨강, 초록, 파랑으로 칠하는 비용이 주어졌을 때, 아래 규칙을 만족하면서 모든 집을 칠하는 비용의 최솟값을 구해보자.
 
-하지만, 박성원은 이 문제를 풀지 못했다.
-
-따라서 박성원은 그냥 랜덤하게 순열 하나를 정답이라고 출력하려고 한다. 이 문제에는 정답이 여러 개 있을 수도 있고, 박성원이 우연히 문제의 정답을 맞출 수도 있다.
-
-박성원이 우연히 정답을 맞출 확률을 분수로 출력하는 프로그램을 작성하시오.
+1번 집의 색은 2번, N번 집의 색과 같지 않아야 한다.
+N번 집의 색은 N-1번, 1번 집의 색과 같지 않아야 한다.
+i(2 ≤ i ≤ N-1)번 집의 색은 i-1, i+1번 집의 색과 같지 않아야 한다.
 ----------------------------------------------------------------------------
-05 MySolution: 1086번
+05 MySolution: 17404번
 
-#include <bits/stdc++.h>
-#define ft first
-#define sd second
-#define all(x) (x).begin(), (x).end()
-#define mem(v, e) memset((v), (e), sizeof((v)))
+#include <iostream>
+#include <algorithm>
+#define MAX 1000*1000+1
 using namespace std;
-using ll = long long;
-using pii = pair<int, int>;
- 
-int n, mod;
-int tenPow[55];
-string nums[22];
-pii p[22];
-ll d[1 << 15][111];
- 
-ll go(int s, int num) {
-    if (s == (1 << n) - 1) return (num % mod == 0);
- 
-    ll &ret = d[s][num];
-    if (ret != -1) return ret;
-    ret = 0;
-    for (int k = 0; k < n; k++) {
-        if (s & (1 << k)) continue;
-        auto[next, cnt] = p[k];
-        ll nextNum = num * tenPow[cnt] + next;
-        nextNum %= mod;
-        ret += go(s | (1 << k), nextNum);
+
+int cost[1001][3];
+int main(){
+    ios::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);
+    int n;
+    int ans = MAX;
+    cin>>n;
+    int r,g,b;
+    for(int i=1;i<=n;i++){
+        cin>>r>>g>>b;
+        cost[i][0]=r;
+        cost[i][1]=g;
+        cost[i][2]=b;
     }
-    return ret;
-}
- 
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(nullptr);
- 
-    cin >> n;
-    ll all = 1;
-    for (int i = 0; i < n; i++) {
-        cin >> nums[i];
-        all *= (i + 1);
-    }
-    cin >> mod;
-    tenPow[0] = 1 % mod;
-    for (int i = 1; i < 55; i++) {
-        tenPow[i] = (tenPow[i - 1] * 10) % mod;
-    }
-    for (int i = 0; i < n; i++) {
-        reverse(all(nums[i]));
-        p[i].sd = nums[i].size();
-        for (int j = 0; j < nums[i].size(); j++) {
-            p[i].ft += (nums[i][j] - '0') * tenPow[j] % mod;
- 
+    
+    for(int start=0; start<=2; start++){
+        int dp[1001][3];
+        for(int j=0;j<=2;j++){
+            if(j==start) dp[1][start]=cost[1][start];
+            else dp[1][j]= MAX;
         }
-        p[i].ft %= mod;
+        for(int i=2;i<=n;i++){
+            dp[i][0] = min(dp[i-1][1],dp[i-1][2])+cost[i][0];
+            dp[i][1] = min(dp[i-1][0],dp[i-1][2])+cost[i][1];
+            dp[i][2] = min(dp[i-1][1],dp[i-1][0])+cost[i][2];
+        }
+        for(int j=0;j<=2;j++){
+            if(j==start) continue;
+            ans = min(ans, dp[n][j]);
+        }
     }
-    mem(d, -1);
-    ll cnt = go(0, 0);
-    ll g = gcd(all, cnt);
-    cout << cnt / g << "/" << all / g;
+    cout<<ans;
+    return 0;
 }
 
 ----------------------------------------------------------------------------

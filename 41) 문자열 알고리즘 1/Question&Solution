@@ -248,3 +248,57 @@ int main()
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+04 Question: 14425번
+
+총 N개의 문자열로 이루어진 집합 S가 주어진다.
+
+입력으로 주어지는 M개의 문자열 중에서 집합 S에 포함되어 있는 것이 총 몇 개인지 구하는 프로그램을 작성하시오.
+----------------------------------------------------------------------------
+04 MySolution: 14425번
+
+#include <iostream>
+#include <string>
+#include <map>
+using namespace std;
+struct node
+{
+    map<string, node *> m;
+};
+node *head;
+void print(node *cur, string depth)
+{
+    for (auto s : cur->m)
+    {
+        cout << depth + s.first << "\n";
+        print(s.second, depth + "--");
+    }
+}
+
+int main()
+{
+    ios::sync_with_stdio(0), cin.tie(0);
+    int N, K;
+    string food;
+    head = new node;
+    cin >> N;
+    while (N--)
+    {
+        cin >> K;
+        node *cur = head;
+        while (K--)
+        {
+            cin >> food;
+            if (cur->m.find(food) == cur->m.end())
+            {
+                cur->m[food] = new node;
+            }
+            cur = cur->m[food];
+        }
+    }
+    print(head, "");
+    return 0;
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

@@ -1,0 +1,73 @@
+01 Question: 2252번
+
+N명의 학생들을 키 순서대로 줄을 세우려고 한다. 각 학생의 키를 직접 재서 정렬하면 간단하겠지만, 마땅한 방법이 없어서 두 학생의 키를 비교하는 방법을 사용하기로 하였다. 그나마도 모든 학생들을 다 비교해 본 것이 아니고, 일부 학생들의 키만을 비교해 보았다.
+
+일부 학생들의 키를 비교한 결과가 주어졌을 때, 줄을 세우는 프로그램을 작성하시오.
+----------------------------------------------------------------------------
+01 MySolution: 2252번
+
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <cstring>
+#include <cmath>
+#include <vector>
+
+using namespace std;
+
+int n, m;
+vector<int> inDegree, result;
+vector<vector<int>> graph;
+
+
+void input(){
+    cin >> n >> m;
+    inDegree.assign(n + 1, 0);
+    result.assign(n + 1, 0);
+    graph.assign(n + 1, vector<int>(0, 0));
+
+    for(int i = 0; i < m; i++){
+        int a, b;
+        cin >> a >> b;
+        graph[a].emplace_back(b);
+        inDegree[b]++;
+    }
+}
+
+void topology_sort(){
+    queue<int> q;
+    for(int i = 1; i <= n; i++){
+        if(inDegree[i] == 0)    q.push(i);
+    }
+
+    for(int i = 0; i < n; i++){
+        if(q.empty())   return;
+        int cur = q.front();
+        result[i] = cur;
+        q.pop();
+
+        for(int k = 0; k < graph[cur].size(); k++){
+            int next = graph[cur][k];
+            if(--inDegree[next] == 0)   q.push(next);
+        }
+    }
+}
+
+int main(){
+
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+
+    input();
+    topology_sort();
+
+    for(int i = 0; i < n; i++){
+        cout << result[i] << " ";
+    }
+
+    return 0;
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

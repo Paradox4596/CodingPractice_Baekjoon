@@ -1,0 +1,66 @@
+01 Question: 3584번
+
+루트가 있는 트리(rooted tree)가 주어지고, 그 트리 상의 두 정점이 주어질 때 그들의 가장 가까운 공통 조상(Nearest Common Ancestor)은 다음과 같이 정의됩니다.
+
+두 노드의 가장 가까운 공통 조상은, 두 노드를 모두 자손으로 가지면서 깊이가 가장 깊은(즉 두 노드에 가장 가까운) 노드를 말합니다.
+nca.png
+
+예를 들어 15와 11를 모두 자손으로 갖는 노드는 4와 8이 있지만, 그 중 깊이가 가장 깊은(15와 11에 가장 가까운) 노드는 4 이므로 가장 가까운 공통 조상은 4가 됩니다.
+
+루트가 있는 트리가 주어지고, 두 노드가 주어질 때 그 두 노드의 가장 가까운 공통 조상을 찾는 프로그램을 작성하세요
+----------------------------------------------------------------------------
+01 MySolution: 3584번
+
+#include<iostream>
+#include<algorithm>
+using namespace std;
+
+int parent[10001];
+bool visit[10001];
+int T, N, A, B, u, v;
+
+int main()
+{
+	ios_base::sync_with_stdio(0);
+	cin.tie(0);
+
+	cin >> T;
+
+	while (T--)
+	{
+		cin >> N;
+
+		for (int i = 1; i <= N; i++)
+		{
+			visit[i] = false;
+			parent[i] = i;
+		}
+
+		for (int i = 0; i < N - 1; i++)
+		{
+			cin >> A >> B;
+			parent[B] = A;
+		}
+
+		cin >> u >> v;
+		visit[u] = true;
+
+		while (u != parent[u])
+		{
+			u = parent[u];
+			visit[u] = true;
+		}
+		while (true)
+		{
+			if (visit[v])
+			{
+				cout << v << '\n';
+				break;
+			}
+			v = parent[v];
+		}
+		
+	}
+}
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

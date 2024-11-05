@@ -64,3 +64,79 @@ int main()
 }
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+02 Question: 17435번
+
+함수 f : {1, 2, ..., m}→{1, 2, ..., m}이 있다. 이때 fn : {1, 2, ..., m}→{1, 2, ..., m}을 다음과 같이 정의하자.
+
+f1(x) = f(x)
+fn+1(x) = f(fn(x))
+예를 들어 f4(1) = f(f(f(f(1))))이다.
+
+n과 x가 주어질 때 fn(x)를 계산하는 쿼리를 수행하는 프로그램을 작성하시오.
+----------------------------------------------------------------------------
+02 MySolution: 17435번
+
+#include<iostream>
+#include<vector>
+#include<algorithm>
+
+using namespace std;
+
+int m;
+int Q;
+int n, x;
+int f[200001];
+#define max_log 20
+int table[21][200001];
+
+void init()
+{
+	cin >> m;
+	for (int i = 1; i <= m; i++) {
+		int num;
+		cin >> num;
+		f[i] = num;
+	}
+
+	for (int i = 1; i <= m; i++)
+		table[0][i] = f[i];
+
+	for (int i = 1; i < max_log; i++) {
+		for (int j = 1; j <= m; j++) {
+			int tmp = table[i - 1][j];
+			table[i][j] = table[i - 1][tmp];
+		}
+	}
+}
+
+
+int solve(int n, int x)
+{
+	int cur = x;
+	for (int k = 0; k < max_log; k++) {
+		if (n & (1 << k)) {
+			cur = table[k][cur];
+		}
+	}
+	return cur;
+}
+
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
+
+	init();
+
+	cin >> Q;
+	while (Q--) {
+		cin >> n >> x;
+		
+		int res = solve(n, x);
+		cout << res << '\n';
+	}
+}
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

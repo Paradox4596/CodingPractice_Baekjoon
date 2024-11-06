@@ -140,3 +140,75 @@ int main()
 }
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+03 Question: 11438번
+
+N(2 ≤ N ≤ 100,000)개의 정점으로 이루어진 트리가 주어진다. 트리의 각 정점은 1번부터 N번까지 번호가 매겨져 있으며, 루트는 1번이다.
+
+두 노드의 쌍 M(1 ≤ M ≤ 100,000)개가 주어졌을 때, 두 노드의 가장 가까운 공통 조상이 몇 번인지 출력한다.
+----------------------------------------------------------------------------
+03 MySolution: 11438번
+
+#include<iostream>
+#include<vector>
+#include<algorithm>
+
+using namespace std;
+
+int m;
+int Q;
+int n, x;
+int f[200001];
+#define max_log 20
+int table[21][200001];
+
+void init()
+{
+	cin >> m;
+	for (int i = 1; i <= m; i++) {
+		int num;
+		cin >> num;
+		f[i] = num;
+	}
+
+	for (int i = 1; i <= m; i++)
+		table[0][i] = f[i];
+
+	for (int i = 1; i < max_log; i++) {
+		for (int j = 1; j <= m; j++) {
+			int tmp = table[i - 1][j];
+			table[i][j] = table[i - 1][tmp];
+		}
+	}
+}
+
+
+int solve(int n, int x)
+{
+	int cur = x;
+	for (int k = 0; k < max_log; k++) {
+		if (n & (1 << k)) {
+			cur = table[k][cur];
+		}
+	}
+	return cur;
+}
+
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
+
+	init();
+
+	cin >> Q;
+	while (Q--) {
+		cin >> n >> x;
+		
+		int res = solve(n, x);
+		cout << res << '\n';
+	}
+}
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

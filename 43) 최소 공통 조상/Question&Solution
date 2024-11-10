@@ -229,3 +229,138 @@ int main() {
 }
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+04 Question: 3176번
+
+N개의 도시와 그 도시를 연결하는 N-1개의 도로로 이루어진 도로 네트워크가 있다. 
+
+모든 도시의 쌍에는 그 도시를 연결하는 유일한 경로가 있고, 각 도로의 길이는 입력으로 주어진다.
+
+총 K개의 도시 쌍이 주어진다. 이때, 두 도시를 연결하는 경로 상에서 가장 짧은 도로의 길이와 가장 긴 도로의 길이를 구하는 프로그램을 작성하시오.
+----------------------------------------------------------------------------
+04 MySolution: 3176번
+
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const int nMAX = 100001;
+const int iMAX = 17;
+
+int N;
+vector<pair<int, int>> adj[nMAX];
+
+bool visited[nMAX];
+
+int minLength[nMAX][iMAX];
+int maxLength[nMAX][iMAX];
+int parent[nMAX][iMAX];
+int depth[nMAX];
+
+void dfs(int start, int n){
+	visited[start] = true;
+	depth[start] = n;
+	for(int i=0; i<adj[start].size(); i++){
+		int next = adj[start][i].first;
+		int weight = adj[start][i].second;
+		
+		if(visited[next]) continue;
+
+		parent[next][0] = start;
+
+		minLength[next][0] = weight;
+		maxLength[next][0] = weight;
+		dfs(next, n+1);
+	}
+}
+
+void connect(){
+	for(int p=1; p<iMAX; p++){
+		for(int cur=1; cur<=N; cur++){
+			int prevParent = parent[cur][p-1];
+			parent[cur][p] = parent[prevParent][p-1];
+			
+			if(parent[prevParent][p-1] == 0) continue;
+			
+			int prevMin = minLength[prevParent][p-1];
+			int prevMax = maxLength[prevParent][p-1];
+
+			int curMin = minLength[cur][p-1];
+			int curMax = maxLength[cur][p-1];
+
+			minLength[cur][p] = min(prevMin, curMin);
+			maxLength[cur][p] = max(prevMax, curMax);
+		}
+	}
+}
+
+pair<int, int> LCA(int xNode, int yNode){
+	if(depth[xNode] > depth[yNode]){
+		int temp = xNode;
+		xNode = yNode;
+		yNode = temp;
+	}
+	int mins = 1000001;
+	int maxs = -1;
+
+	for(int i=iMAX-1; i>=0; i--){
+		int jump = 1 << i;
+		if(depth[yNode] - depth[xNode] >= jump){
+
+			mins = min(mins, minLength[yNode][i]);
+			maxs = max(maxs, maxLength[yNode][i]);
+			yNode = parent[yNode][i];
+		}
+	}
+
+	if(xNode == yNode) return {mins, maxs};
+	for(int i=iMAX-1; i>=0; i--){
+		if(parent[xNode][i] == parent[yNode][i]) continue;
+		
+		mins = min(mins, min(minLength[xNode][i], minLength[yNode][i]));
+		maxs = max(maxs, max(maxLength[xNode][i], maxLength[yNode][i]));
+		
+		xNode = parent[xNode][i];
+		yNode = parent[yNode][i];
+	}
+	mins = min(mins, min(minLength[xNode][0], minLength[yNode][0]));
+	maxs = max(maxs, max(maxLength[xNode][0], maxLength[yNode][0]));
+
+	return {mins, maxs};
+}
+
+int main() {
+	scanf("%d", &N);
+	for(int i=0; i<N-1; i++) {
+		int A, B, C;
+		scanf("%d%d%d", &A, &B, &C);
+
+		adj[A].push_back({B, C});
+		adj[B].push_back({A, C});
+	}
+
+	int K;
+	scanf("%d", &K);
+	vector<pair<int, int>> ans(K);
+	for(int i=0; i<K; i++) {
+		int D, E;
+		scanf("%d%d", &D, &E);
+		ans[i] = {D, E};
+	}
+
+	dfs(1, 0);
+	connect();
+
+	for(int i=0; i<K; i++) {
+		int x = ans[i].first;
+		int y = ans[i].second;
+
+		pair<int, int> ans = LCA(x, y);
+		printf("%d %d\n", ans.first, ans.second);
+	}
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

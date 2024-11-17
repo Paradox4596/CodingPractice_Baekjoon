@@ -194,3 +194,120 @@ int main(){
 }
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+02 Question: 3977번
+
+World Soccer Championship이 다가오고 있다! 천재적인 전술을 창조하는 플랜 아티스트 감독 도현이는 자신의 팀이 승리하도록 만반의 준비를 가하고 있다. 도현이의 전략은 경기장을 여러 개의 구역으로 나누고, 어떤 선수가 A구역에서 B구역으로 이동하게 하는 움직임을 (A, B)로 표현한다. 모든 도현이의 팀 선수들이 이 움직임만을 따라서 이동한다면 승리하리라고 도현이는 확신한다.
+
+도현이는 선수들에게 자신의 전술을 말해주며, 다른 모든 구역에 도달할 수 있는 시작 구역을 찾은 뒤 지시한 움직임만을 따라가라고 했다. 그러나 도현이는 한 가지 간과한 것이 있었는데 그건 선수들이 자신만큼 똑똑하지 않다는 것이다. 선수들은 그러한 시작 구역을 찾는 것이 어려웠다. 이제 당신이 적절한 시작 구역을 찾아줘야 한다.
+----------------------------------------------------------------------------
+02 MySolution: 3977번
+
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <vector>
+#include <stack>
+
+using namespace std;
+
+const int MAX_N = 100001;
+
+int T;
+int N, M;
+vector<int> adj[MAX_N];
+
+stack<int> st;
+int discover[MAX_N], scc[MAX_N];
+int sccCnt, sccSize;
+vector<int> SCCNode[MAX_N];
+bool repreSCC[MAX_N];
+int startSCC;
+
+int dfs(int no) {
+    st.push(no);
+    discover[no] = sccCnt++;
+    int parent = discover[no];
+    
+    for(auto next : adj[no]) {
+        if(discover[next] == -1)
+            parent = min(parent, dfs(next));
+        else if(scc[next] == -1)
+            parent = min(parent, discover[next]);
+    }
+    
+    if(parent == discover[no]) {
+        while(true) {
+            int x = st.top();
+            st.pop();
+            scc[x] = sccSize;
+            SCCNode[sccSize].push_back(x);
+            if(no == x)
+                break;
+        }
+        sccSize++;
+    }
+    
+    return parent;
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0); cout.tie(0);
+    
+    cin >> T;
+    while(T--) {
+        for(int i=0; i<MAX_N; i++) {
+            adj[i].clear();
+            SCCNode[i].clear();
+        }
+        memset(discover, -1, sizeof discover);
+        memset(scc, -1, sizeof scc);
+        sccCnt = sccSize = 1;
+        fill(repreSCC, repreSCC+MAX_N, true);
+        
+        cin >> N >> M;
+        for(int i=0; i<M; i++) {
+            int a, b;
+            cin >> a >> b;
+            adj[a].push_back(b);
+        }
+        
+        for(int i=0; i<N; i++) {
+            if(discover[i] == -1)
+                dfs(i);
+        }
+
+        for(int i=0; i<N; i++)
+            for(auto next : adj[i])
+                if(scc[i] != scc[next])
+                    repreSCC[scc[next]] = false;
+        
+        sccSize--;
+        int cnt = 0;
+        for(int i=1; i<=sccSize; i++) {
+            if(repreSCC[i]) {
+                cnt++;
+                startSCC = i;
+            }
+        }
+        
+        if(!cnt) {
+            for(int i=0; i<N; i++)
+                cout << i << '\n';
+        }
+        else if(cnt == 1) {
+            sort(SCCNode[startSCC].begin(), SCCNode[startSCC].end());
+            for(auto x : SCCNode[startSCC]) {
+                cout << x << '\n';
+            }
+        }
+        else
+            cout << "Confused" << '\n';
+        cout << '\n';
+    }
+    
+    return 0;
+}
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

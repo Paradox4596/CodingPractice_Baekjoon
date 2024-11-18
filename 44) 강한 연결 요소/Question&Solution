@@ -195,13 +195,13 @@ int main(){
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 
-02 Question: 3977번
+03 Question: 3977번
 
 World Soccer Championship이 다가오고 있다! 천재적인 전술을 창조하는 플랜 아티스트 감독 도현이는 자신의 팀이 승리하도록 만반의 준비를 가하고 있다. 도현이의 전략은 경기장을 여러 개의 구역으로 나누고, 어떤 선수가 A구역에서 B구역으로 이동하게 하는 움직임을 (A, B)로 표현한다. 모든 도현이의 팀 선수들이 이 움직임만을 따라서 이동한다면 승리하리라고 도현이는 확신한다.
 
 도현이는 선수들에게 자신의 전술을 말해주며, 다른 모든 구역에 도달할 수 있는 시작 구역을 찾은 뒤 지시한 움직임만을 따라가라고 했다. 그러나 도현이는 한 가지 간과한 것이 있었는데 그건 선수들이 자신만큼 똑똑하지 않다는 것이다. 선수들은 그러한 시작 구역을 찾는 것이 어려웠다. 이제 당신이 적절한 시작 구역을 찾아줘야 한다.
 ----------------------------------------------------------------------------
-02 MySolution: 3977번
+03 MySolution: 3977번
 
 #include <iostream>
 #include <algorithm>
@@ -306,6 +306,162 @@ int main() {
             cout << "Confused" << '\n';
         cout << '\n';
     }
+    
+    return 0;
+}
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+
+04 Question: 4013번
+
+인도의 도시 중 하나인 시루세리에는 모든 도로들이 일방통행으로 되어 있다. 도로들이 만나는 모든 교차로에는 시루세리 은행의 현금입출금기(ATM)가 설치되어 있다. 시루세리에는 유명한 레스토랑 체인인 아웃백 커리 하우스가 있다. 이 레스토랑의 각 체인점들은 교차로에만 위치한다. 물론 각 교차로마다 항상 이 레스토랑 체인점이 있는 것은 아니다. 이 레스토랑은 현금만 사용할 수 있다. 
+
+시루세리에 사는 반디치는 오늘 오후에 이 레스토랑에서 가족들과 파티를 열려고 한다. 그런데 갖고 있는 현금이 부족하여 레스토랑으로 가는 동안에 가능한 한 많은 현금을 ATM 기기로부터 인출할 계획을 세웠다. 그는 자신의 집에서 출발하여 차로 이동하면서 통과하는 모든 교차로 ATM 기기에 들어있는 현금 전부를 인출하려고 한다. 차량의 최종 목적지는 아웃백 커리 하우스 체인점 중의 한 곳이고, 이 체인점이 어떤 교차로에 위치하는지는 상관없다.
+
+반디치는 시루세리 은행의 홈페이지 정보를 통해 각 ATM 기기에 현금이 얼마나 들어 있는지를 알고 있다. 이동 시 동일한 도로나 교차로를 여러 번 지날 수 있다. ATM 기기의 현금은 새로 보충되지 않기 때문에 첫 번째 이후 다시 방문하는 교차로의 ATM 기기에는 인출할 현금이 없다.
+
+예를 들어, 아래 그림처럼 도시에 6개의 교차로가 있다고 하자. 교차로는 원으로 표시되어 있고, 화살표는 도로를 나타낸다. 이중 원으로 표시된 교차로에는 레스토랑이 있다. 각 ATM 기기가 갖고 있는 현금의 액수는 교차로 위에 표시된 숫자이다. 이 예에서 현금 인출을 1번 교차로부터 시작한다면, 반디치는 1-2-4-1-2-3-5의 경로를 통해서 총 47의 현금을 인출할 수 있다.
+
+
+
+반디치가 출발 장소에서 어떤 레스토랑까지 이동하면서 인출할 수 있는 현금의 최대 액수가 얼마인지를 계산하는 프로그램을 작성하시오.
+----------------------------------------------------------------------------
+04 MySolution: 4013번
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <cstring>
+#define fasti ios_base::sync_with_stdio(false); cin.tie(0);
+#define fastio ios_base::sync_with_stdio(false); cin.tie(0); cout.tie(0);
+#define INF 1e9+7
+#define pii pair<int, int>
+#define MAX 500001
+typedef long long ll;
+// typedef pair<int, int> pii;
+ 
+using namespace std;
+ 
+int N, M, S, P;
+bool is_rest[MAX];
+bool is_sccrest[MAX];
+int discovered[MAX];
+int sccnum[MAX];
+ 
+ll sccmoney[MAX];
+ll money[MAX];
+ll sccmaxmoney[MAX];
+ 
+vector<ll> adj[MAX];
+vector<int> sccgraph[MAX];
+vector<int> stk;
+ 
+int sccCounter, vertaxCounter;
+ 
+void input(){
+    cin >> N >> M;
+    int u, v;
+    for(int i = 0; i < M; i++){
+        cin >> u >> v;
+        adj[u].push_back(v);
+    }
+    for(int i = 1; i <= N; i++){
+        cin >> money[i];
+    }
+    cin >> S >> P;
+    for(int i = 0; i < P; i++){
+        cin >> u;
+        is_rest[u] = true;
+    }
+    
+    memset(discovered, -1, sizeof(discovered));
+    memset(sccnum, -1, sizeof(sccnum));
+    memset(sccmaxmoney, -1, sizeof(sccmaxmoney));
+}
+ 
+int SCC(int now){
+    int ret = discovered[now] = vertaxCounter++;
+    stk.push_back(now);
+    
+    for(int i = 0; i < adj[now].size(); i++){
+        int next = adj[now][i];
+        
+        if(discovered[next] == -1){
+            ret = min(ret, SCC(next));
+        }
+        else if(sccnum[next] == -1){
+            ret = min(ret, discovered[next]);
+        }
+    }
+    
+    if(ret == discovered[now]){
+        ll m = 0;
+        bool in_sccrest = false;
+        while(true){
+            int temp = stk.back();
+            stk.pop_back();
+            sccnum[temp] = sccCounter;
+            m += money[temp];
+            if(is_rest[temp]) in_sccrest = true;
+            if(temp == now) break;
+        }
+        sccmoney[sccCounter] = m;
+        if(in_sccrest) is_sccrest[sccCounter] = true;
+        sccCounter++;
+    }
+    
+    return ret;
+}
+ 
+void make_sccgraph(){
+    for(int i = 1; i <= N; i++){
+        for(auto &w : adj[i]){
+            if(sccnum[w] == sccnum[i]) continue;
+            sccgraph[sccnum[i]].push_back(sccnum[w]);
+        }
+    }
+}
+ 
+ll getmaxmoney(int nowscc){
+    ll &ret = sccmaxmoney[nowscc];
+    if(ret != -1) return ret;
+    
+    if(sccgraph[nowscc].empty()){
+        if(is_sccrest[nowscc]) return ret = sccmoney[nowscc];
+        else return ret = 0;
+    }
+    
+    ret = sccmoney[nowscc];
+    ll temp = 0;
+    
+    for(int i = 0; i < sccgraph[nowscc].size(); i++){
+        int nextscc = sccgraph[nowscc][i];
+        temp = max(temp, getmaxmoney(nextscc));
+    }
+    
+    if(temp == 0 && !is_sccrest[nowscc]) return ret = 0;
+ 
+    return ret += temp;
+}
+ 
+void solve(){
+    for(int i = 1; i <= N; i++){
+        if(discovered[i] == -1){
+            SCC(i);
+        }
+    }
+    
+    make_sccgraph();
+    
+    ll res = getmaxmoney(sccnum[S]);
+    cout << res << "\n";
+}
+ 
+int main(){
+    fastio
+    input();
+    solve();
     
     return 0;
 }

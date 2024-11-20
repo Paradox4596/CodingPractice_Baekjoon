@@ -467,3 +467,171 @@ int main(){
 }
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+05 Question: 11280번
+
+2-SAT은 N개의 불리언 변수 
+\(x_1, x_2, ..., x_n\)가 있을 때, 2-CNF 식을 true로 만들기위해 
+\(x_i\)를 어떤 값으로 정해야하는지를 구하는 문제이다.
+
+2-CNF식은 
+\( \left( x \lor y \right) \land \left( \lnot y \lor z \right) \land \left( x \lor \lnot z \right) \land \left( z \lor y \right) \) 와 같은 형태이다. 여기서 괄호로 묶인 식을 절(clause)라고 하는데, 절은 2개의 변수를 
+\(\lor\)한 것으로 이루어져 있다. 
+\(\lor\)는 OR, 
+\(\land\)는 AND, 
+\(\lnot\)은 NOT을 나타낸다.
+
+변수의 개수 N과 절의 개수 M, 그리고 식 
+\(f\)가 주어졌을 때, 식 
+\(f\)를 true로 만들 수 있는지 없는지를 구하는 프로그램을 작성하시오.
+
+예를 들어, N = 3, M = 4이고, 
+\(f =  \left( \lnot x_1 \lor x_2 \right) \land \left( \lnot x_2 \lor x_3 \right) \land \left( x_1 \lor x_3 \right) \land \left( x_3 \lor x_2 \right) \) 인 경우에 
+\(x_1\)을 false, 
+\(x_2\)을 false, 
+\(x_3\)를 true로 정하면 식 
+\(f\)를 true로 만들 수 있다. 하지만, N = 1, M = 2이고, 
+\(f = \left( x_1 \lor x_1 \right) \land \left( \lnot x_1 \lor \lnot x_1 \right) \)인 경우에는 
+\(x_1\)에 어떤 값을 넣어도 식 f를 true로 만들 수 없다.
+----------------------------------------------------------------------------
+05 MySolution: 11280번
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <cstring>
+#define fasti ios_base::sync_with_stdio(false); cin.tie(0);
+#define fastio ios_base::sync_with_stdio(false); cin.tie(0); cout.tie(0);
+#define INF 1e9+7
+#define pii pair<int, int>
+#define MAX 500001
+typedef long long ll;
+// typedef pair<int, int> pii;
+ 
+using namespace std;
+ 
+int N, M, S, P;
+bool is_rest[MAX];
+bool is_sccrest[MAX];
+int discovered[MAX];
+int sccnum[MAX];
+ 
+ll sccmoney[MAX];
+ll money[MAX];
+ll sccmaxmoney[MAX];
+ 
+vector<ll> adj[MAX];
+vector<int> sccgraph[MAX];
+vector<int> stk;
+ 
+int sccCounter, vertaxCounter;
+ 
+void input(){
+    cin >> N >> M;
+    int u, v;
+    for(int i = 0; i < M; i++){
+        cin >> u >> v;
+        adj[u].push_back(v);
+    }
+    for(int i = 1; i <= N; i++){
+        cin >> money[i];
+    }
+    cin >> S >> P;
+    for(int i = 0; i < P; i++){
+        cin >> u;
+        is_rest[u] = true;
+    }
+    
+    memset(discovered, -1, sizeof(discovered));
+    memset(sccnum, -1, sizeof(sccnum));
+    memset(sccmaxmoney, -1, sizeof(sccmaxmoney));
+}
+ 
+int SCC(int now){
+    int ret = discovered[now] = vertaxCounter++;
+    stk.push_back(now);
+    
+    for(int i = 0; i < adj[now].size(); i++){
+        int next = adj[now][i];
+        
+        if(discovered[next] == -1){
+            ret = min(ret, SCC(next));
+        }
+        else if(sccnum[next] == -1){
+            ret = min(ret, discovered[next]);
+        }
+    }
+    
+    if(ret == discovered[now]){
+        ll m = 0;
+        bool in_sccrest = false;
+        while(true){
+            int temp = stk.back();
+            stk.pop_back();
+            sccnum[temp] = sccCounter;
+            m += money[temp];
+            if(is_rest[temp]) in_sccrest = true;
+            if(temp == now) break;
+        }
+        sccmoney[sccCounter] = m;
+        if(in_sccrest) is_sccrest[sccCounter] = true;
+        sccCounter++;
+    }
+    
+    return ret;
+}
+ 
+void make_sccgraph(){
+    for(int i = 1; i <= N; i++){
+        for(auto &w : adj[i]){
+            if(sccnum[w] == sccnum[i]) continue;
+            sccgraph[sccnum[i]].push_back(sccnum[w]);
+        }
+    }
+}
+ 
+ll getmaxmoney(int nowscc){
+    ll &ret = sccmaxmoney[nowscc];
+    if(ret != -1) return ret;
+    
+    if(sccgraph[nowscc].empty()){
+        if(is_sccrest[nowscc]) return ret = sccmoney[nowscc];
+        else return ret = 0;
+    }
+    
+    ret = sccmoney[nowscc];
+    ll temp = 0;
+    
+    for(int i = 0; i < sccgraph[nowscc].size(); i++){
+        int nextscc = sccgraph[nowscc][i];
+        temp = max(temp, getmaxmoney(nextscc));
+    }
+    
+    if(temp == 0 && !is_sccrest[nowscc]) return ret = 0;
+ 
+    return ret += temp;
+}
+ 
+void solve(){
+    for(int i = 1; i <= N; i++){
+        if(discovered[i] == -1){
+            SCC(i);
+        }
+    }
+    
+    make_sccgraph();
+    
+    ll res = getmaxmoney(sccnum[S]);
+    cout << res << "\n";
+}
+ 
+int main(){
+    fastio
+    input();
+    solve();
+    
+    return 0;
+}
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

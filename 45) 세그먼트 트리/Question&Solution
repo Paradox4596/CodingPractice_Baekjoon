@@ -1,34 +1,72 @@
-01 Question: 11047번
+01 Question: 2042번
 
-준규가 가지고 있는 동전은 총 N종류이고, 각각의 동전을 매우 많이 가지고 있다.
-
-동전을 적절히 사용해서 그 가치의 합을 K로 만들려고 한다. 이때 필요한 동전 개수의 최솟값을 구하는 프로그램을 작성하시오.
+어떤 N개의 수가 주어져 있다. 그런데 중간에 수의 변경이 빈번히 일어나고 그 중간에 어떤 부분의 합을 구하려 한다. 만약에 1,2,3,4,5 라는 수가 있고, 3번째 수를 6으로 바꾸고 2번째부터 5번째까지 합을 구하라고 한다면 17을 출력하면 되는 것이다. 그리고 그 상태에서 다섯 번째 수를 2로 바꾸고 3번째부터 5번째까지 합을 구하라고 한다면 12가 될 것이다.
 ----------------------------------------------------------------------------
-01 MySolution: 11047번
+01 MySolution: 2042번
 
 #include <iostream>
 #include <vector>
-#include <algorithm>
+#include <math.h>
+
+#define MAX 1000000
 
 using namespace std;
-int cmp(int a, int b) {
-	return a > b;
+int n, m, k;
+
+long long arr[MAX];
+long long makeSegmentTree(vector<long long> &segmentTree, int node, int start, int end) {
+	if (start == end) {
+		return segmentTree[node] = arr[start];
+	}
+	int mid = (start + end) / 2;
+
+	return segmentTree[node] = makeSegmentTree(segmentTree, node * 2, start, mid) + makeSegmentTree(segmentTree, node * 2 + 1, mid+1, end);
+	
+}
+
+void updateSegmentTree(vector<long long> &segmentTree, int node, int start, int end,int idx, long long diff) {
+	if (idx<start || idx > end) return;
+	segmentTree[node] += diff;
+	if (start != end) {
+		int mid = (start + end) / 2;
+		updateSegmentTree(segmentTree, node * 2, start, mid, idx, diff);
+		updateSegmentTree(segmentTree, node * 2 + 1, mid + 1, end, idx, diff);
+	}
+}
+long long sumSegmentTree(vector<long long> &segmentTree, int node, int left, int right, int start, int end) {
+	if (left>end || right<start) return 0;
+	if (left <= start && right >= end) return segmentTree[node];
+	int mid = (start + end) / 2;
+	return sumSegmentTree(segmentTree, node * 2, left, right, start, mid) + sumSegmentTree(segmentTree, node * 2 + 1, left, right, mid+1, end);
 }
 int main() {
-	int n, k, ans = 0;
-	cin >> n >> k;
-	vector<int> v(n);
+	ios::sync_with_stdio(false);
+	cin.tie(0);
+	cout.tie(0);
+	cin >> n >> m >> k;
 	for (int i = 0; i < n; i++) {
-		cin >> v[i];
+		cin >> arr[i];
 	}
-	sort(v.begin(), v.end(),cmp);
-	for (int i = 0; i < n; i++) {
-		while (k - v[i] >= 0) {
-			ans++;
-			k -= v[i];
+	int treeDepth = ceil(log2(n));
+	int treeSize = 1 << (treeDepth + 1);
+	vector<long long> segmentTree(treeSize);
+	
+	makeSegmentTree(segmentTree,1,0,n-1);
+	for (int i = 0; i < m + k; i++) {
+		int order, left;
+		long long right;
+		cin >> order>> left >> right;
+		if (order == 1) {
+
+			updateSegmentTree(segmentTree, 1, 0, n - 1, left - 1, right-arr[left - 1]);
+			arr[left - 1] = right;
+		}
+		else {
+
+			cout << sumSegmentTree(segmentTree, 1, left-1, right-1, 0, n - 1)<<'\n';
 		}
 	}
-	cout << ans << '\n';
+	return 0;
 }
 
 ----------------------------------------------------------------------------

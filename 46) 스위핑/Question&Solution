@@ -1,0 +1,47 @@
+01 Question: 2170번
+
+매우 큰 도화지에 자를 대고 선을 그으려고 한다. 선을 그을 때에는 자의 한 점에서 다른 한 점까지 긋게 된다. 선을 그을 때에는 이미 선이 있는 위치에 겹쳐서 그릴 수도 있는데, 여러 번 그은 곳과 한 번 그은 곳의 차이를 구별할 수 없다고 하자.
+
+이와 같은 식으로 선을 그었을 때, 그려진 선(들)의 총 길이를 구하는 프로그램을 작성하시오. 선이 여러 번 그려진 곳은 한 번씩만 계산한다.
+----------------------------------------------------------------------------
+01 MySolution: 2170번
+
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+int n;
+vector<pair<int, int> > arr;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n;
+    for(int i=0 ; i<n ; i++) {
+        int a, b;
+        cin >> a >> b;
+        arr.push_back(make_pair(a,b));
+    }
+    sort(arr.begin(), arr.end());
+    int ans=0;
+    int start = arr[0].first, end = arr[0].second;
+    for(int i=1 ; i<n ; i++) {
+        int s = arr[i].first, e = arr[i].second;
+        if(end>=s) {
+            if(end<e) {
+                end = e;
+            } 
+        } else {
+            ans += end-start;
+            start = s, end = e;
+        }
+    }
+    ans += end-start;
+    cout << ans << "\n";
+
+    return 0;
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

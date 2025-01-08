@@ -242,3 +242,96 @@ int main()
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+04 Question: 17131번
+
+여우가 정보섬에 올라왔다!
+
+오늘도 하늘에는 아름다운 별들이 빛나고 있다. 정보섬은 언덕 꼭대기에 위치해 있기 때문에 별이 잘 보이기로 유명하다. 그래서인지, 여우 한 마리가 정보섬에 올라와 밤하늘을 바라보며 별자리를 만들고 있다. 여우는 세 개의 별을 연결하여 V형 별자리를 만드는데, 그 이유는 V가 자신의 얼굴과 닮았기 때문이라나 뭐라나. 여우는 자신의 시점을 기준으로 생각하기 때문에, V가 회전한 모양(<, >, ㄴ, ㄱ, ^ 등)은 V라고 생각하지 않는다.
+
+여우는 만들 수 있는 V형 별자리의 총 개수가 궁금해졌다. 그러나 일일이 세보기에는 별이 너무 많았기 때문에, 여우는 뛰어난 프로그래머인 당신에게 도움을 요청했다! 귀여운 여우를 위해 얼마나 많은 V형 별자리가 만들어질 수 있는지 계산해 주자.
+
+V형 별자리를 명확하게 정의하면 다음과 같다. 세 별 (s,t,u)가 s.x < t.x < u.x이고 s.y > t.y < u.y이면 V형 별자리이다. 예를 들어 아래의 '정보섬의 밤하늘 참고도'에서 (a,b,c)는 V형 별자리를 이루지만 (d,b,c)는 d.x < b.x가 아니므로 V형 별자리가 아니다. V형 별자리의 개수를 셀 때, 한 별이 여러 별자리에 속할 수 있다.
+
+
+
+답이 매우 커질 수 있으므로 (109+7)로 나눈 나머지를 출력한다.
+----------------------------------------------------------------------------
+04 MySolution: 17131번
+
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+using ll = long long;
+using pll = pair<ll, ll>;
+const ll MOD = 1e9 + 7;
+const ll MAX = 2e5 + 5;
+
+struct SegTree {
+    SegTree() { memset(tree, 0, sizeof tree); }
+    ll tree[800005];
+
+    ll query(ll node, ll s, ll e, ll qs, ll qe) {
+        if (qe < s || e < qs) return 0;
+        if (qs <= s && e <= qe) return tree[node];
+        ll mid = (s + e) >> 1;
+        return query(2 * node, s, mid, qs, qe) + query(2 * node + 1, mid + 1, e, qs, qe);
+    }
+
+    void update(ll node, ll s, ll e, ll idx, ll diff) {
+        if (idx < s || idx > e) return;
+        tree[node] += diff;
+        if (s == e) return;
+        ll mid = (s + e) >> 1; 
+        update(2 * node, s, mid, idx, diff);
+        update(2 * node + 1, mid + 1, e, idx, diff);
+    }
+};
+
+pll arr[MAX];
+ll tmp[MAX];
+
+int main() {
+    ll n; scanf("%lld", &n);
+    for (ll i = 0; i < n; i++) {
+        scanf("%lld %lld", &arr[i].first, &arr[i].second);
+    }
+	
+    sort(arr, arr + n);    
+    tmp[0] = 0;
+    for (ll i = 1; i < n; i++) {
+        if (arr[i - 1].first == arr[i].first) tmp[i] = tmp[i - 1];
+        else tmp[i] = tmp[i - 1] + 1;
+    }
+    for (ll i = 0; i < n; i++) arr[i].first = tmp[i];
+
+    SegTree seg = SegTree();
+    
+    for (ll i = 0; i < n; i++) {
+        seg.update(1, 0, MAX, arr[i].first, 1);
+    }
+
+    sort(arr, arr + n, [](pll &a, pll &b) {
+        return a.second == b.second ? a.first < b.first : a.second < b.second;
+    });
+
+    ll res = 0;
+    ll cur = -2e9;
+    for (ll i = 0; i < n; i++) {
+        if (cur != arr[i].second) {
+            cur = arr[i].second;
+            for (ll j = i; cur == arr[j].second && j < n; j++) {
+                seg.update(1, 0, MAX, arr[j].first, -1);
+            }
+        }
+        ll l = seg.query(1, 0, MAX, 0, arr[i].first - 1) % MOD;
+        ll r = seg.query(1, 0, MAX, arr[i].first + 1, MAX) % MOD;
+        res += (l * r) % MOD;
+    }
+    printf("%lld", res % MOD);
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

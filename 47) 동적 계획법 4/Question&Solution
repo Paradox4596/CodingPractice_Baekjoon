@@ -398,30 +398,133 @@ int main() {
 ----------------------------------------------------------------------------
 07 MySolution: 1657번
 
-#include <cstdio>
-#include <cstring>
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+int N, M;
 
-int dp[15 * 15][1 << 14], n, m;
-const int MOD = 9901;
+vector<vector<int>> board(14, vector<int>(14, 0));
+vector<vector<int>> dp_table(14*14, vector<int>(1 << 14, -1));
+vector<vector<int>> price = {
+        {10, 8, 7, 5, 1},
+        {8, 6, 4, 3, 1},
+        {7, 4, 3, 2, 1},
+        {5, 3, 2, 2, 1},
+        {1, 1, 1, 1, 0}
+    };
 
-int dpf(int k, int s) {
-    if (k == n * m && !s) return 1;
-    if (k >= n * m) return 0;
-    int &ret = dp[k][s];
-    if (~ret) return ret;
-    ret = 0;
-    if (s & 1) ret = dpf(k + 1, s >> 1);
-    else {
-        ret += dpf(k + 1, (s >> 1) | (1 << (m - 1)));
-        if ((k % m) != (m - 1) && !(s & 2)) ret += dpf(k + 2, s >> 2);
-    }
-    return ret % MOD;
+int change(char a){
+    if (a != 'F') return a - 'A';
+    return 4;
 }
 
-int main() {
-    scanf("%d %d", &n, &m);
-    memset(dp, -1, sizeof dp);
-    printf("%d", dpf(0, 0));
+int dp(int x, int state){
+    if (x >= N*M){
+        if(x == N*M && state == 0) return 0;
+        return -1;
+    }
+    
+    int& ret = dp_table[x][state];
+    if(ret != -1) return ret;
+    ret = 0;
+
+    int cur = board[x / M][x % M];
+    
+    if ((state & 1) == 0){
+        if ( x % M != M-1 && (state & (1<<1)) == 0){
+            if (dp(x+2, state >> 2) != -1){
+                int next = board[(x+1) / M][(x+1) % M];
+                ret = max(ret, price[cur][next] + dp(x+2, state >> 2));
+            }
+        }
+        if (dp(x+1, (state >> 1) | (1 << (M-1))) != -1 && (x/M) + 1 < N){
+            int next = board[(x / M) + 1][x % M];
+            ret = max(ret, price[cur][next] + dp(x+1, (state >> 1) | (1 << (M-1))));
+        }
+    }
+    if (dp(x + 1, state >> 1) != -1){
+        ret = max(ret, dp(x+1, state >> 1));
+    }
+    return ret;
+}
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    
+    cin >> N >> M;
+    string s;
+    for(int i = 0; i < N; i++){
+        cin >> s;
+        for(int j = 0; j < M; j++){
+            board[i][j] = change(s[j]);
+        }
+    }
+
+    cout << dp(0, 0) << endl;
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+
+08 Question: 11003번
+
+N개의 수 A1, A2, ..., AN과 L이 주어진다.
+
+Di = Ai-L+1 ~ Ai 중의 최솟값이라고 할 때, D에 저장된 수를 출력하는 프로그램을 작성하시오. 이때, i ≤ 0 인 Ai는 무시하고 D를 구해야 한다.
+----------------------------------------------------------------------------
+08 MySolution: 11003번
+
+#include <iostream>
+#include <vector>
+#include <queue>
+ 
+#define endl "\n"
+#define MAX 5000010
+using namespace std;
+ 
+int N, L;
+int Arr[MAX];
+ 
+void Input()
+{
+    cin >> N >> L;
+    for (int i = 1; i <= N; i++) cin >> Arr[i];
+}
+ 
+void Solution()
+{
+    deque<pair<int, int>> DQ;
+    for (int i = 1; i <= N; i++)
+    {
+        if (DQ.empty() == false)
+        {
+            if (DQ.front().second < i - L + 1) DQ.pop_front();
+        }
+        while (DQ.empty() == false && DQ.back().first > Arr[i]) DQ.pop_back();
+        DQ.push_back(make_pair(Arr[i], i));
+        cout << DQ.front().first << " ";
+    }
+    cout << endl;
+}
+ 
+void Solve()
+{
+    Input();
+    Solution();
+}
+ 
+int main(void)
+{
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+ 
+    Solve();
+ 
+    return 0;
 }
 
 ----------------------------------------------------------------------------

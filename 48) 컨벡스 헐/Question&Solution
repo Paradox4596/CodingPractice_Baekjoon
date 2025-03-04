@@ -1,0 +1,69 @@
+01 Question: 1708번
+
+다각형의 임의의 두 꼭짓점을 연결하는 선분이 항상 다각형 내부에 존재하는 다각형을 볼록 다각형이라고 한다. 아래 그림에서 (a)는 볼록 다각형이며, (b)는 볼록 다각형이 아니다.
+
+조금만 생각해 보면 다각형의 모든 내각이 180도 이하일 때 볼록 다각형이 된다는 것을 알 수 있다. 편의상 이 문제에서는 180도 미만인 경우만을 볼록 다각형으로 한정하도록 한다.
+
+2차원 평면에 N개의 점이 주어졌을 때, 이들 중 몇 개의 점을 골라 볼록 다각형을 만드는데, 나머지 모든 점을 내부에 포함하도록 할 수 있다. 이를 볼록 껍질 (CONVEX HULL) 이라 한다. 아래 그림은 N=10인 경우의 한 예이다.
+
+점의 집합이 주어졌을 때, 볼록 껍질을 이루는 점의 개수를 구하는 프로그램을 작성하시오.
+----------------------------------------------------------------------------
+01 MySolution: 1708번
+
+#include <cstdio>
+#include <vector>
+#include <stack>
+#include <algorithm>
+using namespace std;
+ 
+struct Coor { long long x, y; };
+vector<Coor> Point;
+ 
+long long CCW(Coor a, Coor b, Coor c) {
+    return a.x*b.y + b.x*c.y + c.x*a.y - a.x*c.y - b.x*a.y - c.x*b.y;
+}
+ 
+bool minCCW(Coor a, Coor b) {
+    long long Value = CCW(Point[0], a, b);
+    if(Value) return Value > 0;
+    else if(a.y != b.y) return a.y < b.y;
+    else return a.x < b.x;
+}
+ 
+int main() {
+    int N;
+    Coor temp1, temp2;
+    stack<Coor> Convex;
+    scanf("%d", &N);
+    Point.resize(N);
+    for(int i=0; i<N; i++) scanf("%lld %lld", &Point[i].x, &Point[i].y);
+    for(int i=1; i<N; i++) {
+        if(Point[i].y < Point[0].y || (Point[i].y == Point[0].y && Point[i].x < Point[0].x)) {
+            long long temp = Point[0].x;
+            Point[0].x = Point[i].x;
+            Point[i].x = temp;
+            temp = Point[0].y;
+            Point[0].y = Point[i].y;
+            Point[i].y = temp;
+        }
+    }
+    sort(Point.begin()+1, Point.end(), minCCW);
+    Convex.push(Point[0]);
+    Convex.push(Point[1]);
+    for(int i=2; i<N; i++) {
+        while(Convex.size() >= 2) {
+            temp2 = Convex.top();
+            Convex.pop();
+            temp1 = Convex.top();
+            if(CCW(temp1, temp2, Point[i]) > 0) {
+                Convex.push(temp2);
+                break;
+            }
+        }
+        Convex.push(Point[i]);
+    }
+    printf("%d", Convex.size());
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

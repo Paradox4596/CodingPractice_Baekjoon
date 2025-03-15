@@ -67,3 +67,139 @@ int main() {
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+02 Question: 10254번
+
+n개의 도시를 가진 나라가 있다. 이 나라에서는 도시들 중 가장 먼 두 도시 사이에 직행 고속도로를 놓으려 한다.
+
+고속도로는 시작점과 끝점이 아닌 다른 나라를 통과해도 된다. 즉, n개의 도시 중 유클리드 거리가 가장 먼 두 도시를 찾으려 한다. 모든 도시는 한 평면 위에 있다.
+
+
+
+위의 예제에서는 (12,0)의 도시와 (-6,3)의 도시가 가장 먼 유클리드 거리를 갖는다.
+
+도시 n개의 좌표가 주어지면 모든 두 도시 쌍의 거리 중 가장 먼 두 도시를 찾아라.
+----------------------------------------------------------------------------
+02 MySolution: 10254번
+
+	#include <cstdio>
+#include <vector>
+#include <stack>
+#include <algorithm>
+using namespace std;
+ 
+struct Point
+{
+	int x, y, p, q;
+ 
+	Point() {}
+	Point(int x_, int y_, int p_ = 0, int q_ = 0) :x(x_), y(y_), p(p_), q(q_) {}
+ 
+	bool operator < (const Point& arg)
+	{
+		if (1LL * p*arg.q != 1LL * q*arg.p)	return 1LL * p*arg.q - 1LL * q*arg.p > 0;
+		if (y != arg.y)	return y < arg.y;
+		return x < arg.x;
+	}
+};
+long long ccw(const Point& a, const Point &b, const Point &c)
+{
+	return 1LL * (b.x - a.x)*(c.y - a.y) - 1LL * (b.y - a.y)*(c.x - a.x);
+}
+long long cal_dist(const Point& a, const Point& b)
+{
+	return 1LL*(b.x - a.x)*(b.x - a.x) + 1LL*(b.y - a.y)*(b.y - a.y);
+}
+int main()
+{
+	int t;
+	scanf("%d", &t);
+ 
+	while (t--)
+	{
+		int n;
+		vector<Point> v;
+		stack<int> s;
+ 
+		scanf("%d", &n);
+		v.resize(n);
+ 
+		for (int i = 0; i < n; ++i)
+		{
+			int x, y;
+			scanf("%d %d", &x, &y);
+			v[i] = Point(x, y);
+		}
+		sort(v.begin(), v.end());
+ 
+		for (int i = 1; i < n; ++i)
+		{
+			v[i].p = v[i].x - v[0].x;
+			v[i].q = v[i].y - v[0].y;
+		}
+		sort(++v.begin(), v.end());
+ 
+		s.push(0);
+		s.push(1);
+		int next = 2;
+		while (next < n){
+			while (s.size() >= 2){
+				int second, first;
+				second = s.top(); s.pop();
+				first = s.top();
+				if (ccw(v[first], v[second], v[next]) > 0){
+					s.push(second);
+					break;
+				}
+			}
+			s.push(next++);
+		}
+		
+		vector<Point> convexhull;
+		while (!s.empty())
+		{
+			convexhull.push_back(v[s.top()]);
+			s.pop();
+		}
+		
+		long long maxdist = 0;
+		Point ans1, ans2;
+		int j = 1;
+		
+		for (int i = 0; i < convexhull.size(); ++i)
+		{
+			int i_next = (i + 1) % convexhull.size(); 
+			for (;;){
+				int j_next = (j + 1) % convexhull.size();	
+				Point v_i, v_j;	
+ 
+				v_i.x = convexhull[i_next].x - convexhull[i].x;
+				v_i.y = convexhull[i_next].y - convexhull[i].y;
+ 
+				v_j.x = convexhull[j_next].x - convexhull[j].x;
+				v_j.y = convexhull[j_next].y - convexhull[j].y;
+				
+				Point temp = Point(0,0);	
+ 
+				if (ccw(temp, v_i, v_j) < 0)
+					j = j_next;
+				else 
+					break;
+			}
+			long long dist = cal_dist(convexhull[i], convexhull[j]);
+ 
+			if (dist > maxdist)
+			{
+				maxdist = dist;
+				ans1 = convexhull[i];
+				ans2 = convexhull[j];
+			}
+		}
+ 
+		printf("%d %d %d %d\n", ans1.x, ans1.y, ans2.x, ans2.y);
+	}
+	return 0;
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

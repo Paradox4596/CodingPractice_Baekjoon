@@ -284,3 +284,196 @@ int main() {
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+04 Question: 3878번
+
+평면 위에 여러 개의 검정 점과 흰 점이 있다. 이때, 길이가 무한대인 직선을 그어 흰 점과 검은 점을 분리하려고 한다. 직선은 어떤 점과도 만나면 안 된다. 직선으로 인해서 나누어지는 두 그룹 중 한 그룹에는 흰 점만 있어야 하고, 다른 그룹에는 검은 점만 있어야 한다.
+
+아래 그림에서 제일 왼쪽 예제는 점선으로 표시된 직선으로 두 점을 나눌 수 있다. 하지만 나머지 예제는 직선으로 점을 분리할 수 없다.
+
+흰 점과 검은 점의 좌표가 주어졌을 때, 직선으로 점을 분리할 수 있는지 없는지를 알아내는 프로그램을 작성하시오.
+----------------------------------------------------------------------------
+04 MySolution: 3878번
+
+#include<iostream>
+#include<algorithm>
+#include<stack>
+#include<vector>
+using namespace std;
+struct POS {
+    double x, y;
+}b[101], w[101];
+int B, W;
+stack<int> stk;
+vector<int> bHull, wHull;
+int ccw(POS p1, POS p2, POS p3) {
+    long double ret = (p1.x*p2.y + p2.x*p3.y + p3.x*p1.y) - (p1.y*p2.x + p2.y*p3.x + p3.y * p1.x);
+    if (ret < 0) return -1;
+    else if (ret > 0) return 1;
+    else return 0;
+}
+long double distSquare(POS p1, POS p2) {
+    return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
+}
+bool cmpB(POS p1, POS p2) {
+    if (ccw(b[0], p1, p2) > 0) return true;
+    else if (ccw(b[0], p1, p2) < 0) return false;
+    else {
+        long double dist1 = distSquare(b[0], p1);
+        long double dist2 = distSquare(b[0], p2);
+        if (dist1 < dist2) return true;
+        else return false;
+    }
+}
+bool cmpW(POS p1, POS p2) {
+    if (ccw(w[0], p1, p2) > 0) return true;
+    else if (ccw(w[0], p1, p2) < 0) return false;
+    else {
+        long double dist1 = distSquare(w[0], p1);
+        long double dist2 = distSquare(w[0], p2);
+        if (dist1 < dist2) return true;
+        else return false;
+    }
+}
+void grahamScan(POS p[],int num, int flag) {
+    
+    stk.push(0);
+    if (num > 1)
+        stk.push(1);
+    int next = 2;
+    
+ 
+    while (next < num) {
+        while (stk.size() >= 2) {
+            int sec = stk.top();
+            stk.pop();
+            int fir = stk.top();
+            if (ccw(p[fir], p[sec], p[next]) > 0) {
+                stk.push(sec);
+                break;
+            }
+        }
+        stk.push(next++);
+    }
+ 
+    if (flag == 0) {
+        while (!stk.empty()) {
+            bHull.push_back(stk.top());
+            stk.pop();
+        }
+        sort(bHull.begin(), bHull.end());
+        bHull.push_back(bHull[0]);
+    }
+    else {
+        while (!stk.empty()) {
+            wHull.push_back(stk.top());
+            stk.pop();
+        }
+        sort(wHull.begin(), wHull.end());
+        wHull.push_back(wHull[0]);
+    }
+}
+bool isCross(POS p1, POS p2, POS p3, POS p4) {
+    if (ccw(p1, p2, p3) * ccw(p1, p2, p4) <= 0 && 
+        ccw(p3, p4, p1) * ccw(p3, p4, p2) <= 0) {
+        
+        if ((p1.x < p3.x && p1.x < p4.x && p2.x < p3.x && p2.x < p4.x) ||
+            (p3.x < p1.x && p3.x < p2.x && p4.x < p1.x && p4.x < p2.x)) return false;
+        if ((p1.y < p3.y && p1.y < p4.y && p2.y < p3.y && p2.y< p4.y) ||
+            (p3.y < p1.y && p3.y < p2.y && p4.y < p1.y&& p4.y < p2.y)) return false;
+        return true;
+    }
+    return false;
+}
+int main(void) {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        bHull.clear();
+        wHull.clear();
+        cin >> B >> W;
+        double bymin = 20000, wymin = 20000;
+        int byminIdx = 0, wyminIdx = 0;
+        for (int i = 0; i < B; i++) {
+            cin >> b[i].x >> b[i].y;
+            if (b[i].y < bymin) {
+                bymin = b[i].y;
+                byminIdx = i;
+            }
+            else if (b[i].y == bymin) {
+                if (b[i].x < b[byminIdx].x) byminIdx = i;
+            }
+        }
+        swap(b[0], b[byminIdx]);
+        sort(b + 1, b + B, cmpB);
+        grahamScan(b, B, 0);
+        
+        for (int i = 0; i < W; i++) {
+            cin >> w[i].x >> w[i].y;
+            if (w[i].y < wymin) {
+                wymin = w[i].y;
+                wyminIdx = i;
+            }
+            else if (w[i].y == wymin) {
+                if (w[i].x < w[wyminIdx].x) wyminIdx = i;
+            }
+        }
+        swap(w[0], w[wyminIdx]);
+        sort(w + 1, w + W, cmpW);
+        grahamScan(w, W, 1);
+        
+        bool meet = false;
+ 
+        for (int i = 0; i < bHull.size()-1; i++) {
+            for(int j = 0; j < wHull.size()-1; j++) {
+                if (isCross(b[bHull[i]], b[bHull[i + 1]], w[wHull[j]], w[wHull[j + 1]])) {
+                    meet = true;
+                    break;
+                }
+            }
+            if (meet) break;
+        }
+    
+        if (meet) {
+            cout << "NO" << '\n';
+            continue;
+        }
+ 
+        bool allPlus = true;
+        for (int i = 0; i < bHull.size() - 1; i++) {
+            for (int j = 0; j < wHull.size() - 1; j++) {
+                if (ccw(b[bHull[i]], b[bHull[i + 1]], w[wHull[j]]) <= 0) {
+                    allPlus = false;
+                    break;
+                }
+            }
+            if (!allPlus) 
+                break;
+        }
+        if (allPlus) {
+            cout << "NO\n";
+            continue;
+        }
+ 
+        allPlus = true;
+        for (int i = 0; i < wHull.size() - 1; i++) {
+            for (int j = 0; j < bHull.size() - 1; j++) {
+                if (ccw(w[wHull[i]], w[wHull[i + 1]], b[bHull[j]]) <= 0) {
+                    allPlus = false;
+                    break;
+                }
+            }
+            if (!allPlus) break;
+        }
+        if (allPlus) {
+            cout << "NO\n";
+            continue;
+        }
+        cout << "YES\n";
+    }
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

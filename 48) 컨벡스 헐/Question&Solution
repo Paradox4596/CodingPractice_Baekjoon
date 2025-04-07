@@ -477,3 +477,100 @@ int main(void) {
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+05 Question: 1867번
+
+n행 n열의 격자로 나뉜 운동장이 있다. 이 위에 k개의 돌멩이가 있는데, 하나의 돌멩이는 격자 한 칸에 정확히 들어가 있으며, 두 개 이상의 돌멩이가 한 칸에 들어가 있는 경우는 없다.
+
+사고의 위험을 없애기 위해 이 돌멩이를 모두 제거하고 깨끗한 운동장을 만들려고 한다. 돌멩이를 제거할 때에는, 한 행이나 한 열을 따라 직선으로 달려가면서 그 행이나 열에 놓인 돌멩이를 모두 줍는 방식을 쓴다.
+
+여러분이 할 일은 운동장의 상태가 주어졌을 때 최소 몇 번이나 달려가야 돌멩이 줍기를 끝낼 수 있는지 계산하는 것이다.
+----------------------------------------------------------------------------
+05 MySolution: 1867번
+
+	#include <cstdio>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int ans = 0;
+int adj[501][501];
+ 
+int group[2][501][501];
+int groupcount[2] = { 0,0 };
+ 
+int map[501][501];
+int n, k;
+bool visited[501];
+int p[501];
+ 
+bool dfs(int cur)
+{
+	if (visited[cur])
+		return false;
+	visited[cur] = true;
+ 
+	for (int next = 0; next < groupcount[1]; ++next)
+	{
+		if (adj[cur][next] == 1){
+			if (p[next] == -1 || dfs(p[next]))
+			{
+				p[next] = cur;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+ 
+ 
+int main()
+{
+	scanf("%d %d", &n, &k);
+ 
+	for (int i = 0; i < k; ++i){
+		int y, x;
+		scanf("%d %d", &y, &x);
+		map[y - 1][x - 1] = 1;
+	}
+	memset(group, -1, sizeof(group));
+	memset(p, -1, sizeof(p));
+ 
+	for (int i = 0; i < n; ++i){
+		
+		for (int j = 0; j < n; ++j)
+		{
+			if (map[i][j] == 1)
+				group[0][i][j] = groupcount[0];
+		}
+		groupcount[0]++;
+	}
+ 
+	for (int j = 0; j < n; ++j) {
+ 
+		for (int i = 0; i < n; ++i)
+		{
+			if (map[i][j] == 1)
+				group[1][i][j] = groupcount[1];
+		}
+		groupcount[1]++;
+	}
+	for (int i = 0; i < n; ++i)
+		for (int j = 0; j < n; ++j)
+			if (map[i][j] == 1)
+				adj[group[0][i][j]][group[1][i][j]] = 1;
+ 
+	
+	for (int i = 0; i < groupcount[0]; ++i)
+	{
+		memset(visited, false, sizeof(visited));
+		if (dfs(i))
+			ans++;
+	}
+	printf("%d", ans);
+ 
+ 
+	return 0;
+}
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------

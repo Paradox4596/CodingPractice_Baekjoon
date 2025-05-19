@@ -125,3 +125,139 @@ int main() {
 
 ----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
+
+03 Question: 1017번
+
+지민이는 수의 리스트가 있을 때, 이를 짝지어 각 쌍의 합이 소수가 되게 하려고 한다. 예를 들어, {1, 4, 7, 10, 11, 12}가 있다고 하자. 지민이는 다음과 같이 짝지을 수 있다.
+
+1 + 4 = 5, 7 + 10 = 17, 11 + 12 = 23
+
+또는
+
+1 + 10 = 11, 4 + 7 = 11, 11 + 12 = 23
+
+수의 리스트가 주어졌을 때, 지민이가 모든 수를 다 짝지었을 때, 첫 번째 수와 어떤 수를 짝지었는지 오름차순으로 출력하는 프로그램을 작성하시오. 위의 예제에서 1 + 12 = 13으로 소수이다. 그러나, 남은 4개의 수를 합이 소수가 되게 짝지을 수 있는 방법이 없다. 따라서 위의 경우 정답은 4, 10이다.
+----------------------------------------------------------------------------
+03 MySolution: 1017번
+
+#include<iostream>
+#include<queue>
+#include<string.h>
+#include<cmath>
+#include<algorithm>
+using namespace std;
+
+const int MAXN = 2001;
+bool is_prime[MAXN+1];
+int arr_size;
+vector<int> a_set, b_set;
+vector<vector<int>> adj;
+vector<int> a_match, b_match, visited;
+
+void SieveEratos(){
+  memset(is_prime, true, sizeof(is_prime));
+  int sqrtn = int(sqrt(MAXN));
+
+  is_prime[0] = is_prime[1] = false;
+  for(int i=2; i<=sqrtn ; ++i){
+    if(is_prime[i])
+      for(int j= i*i ; j<=MAXN ; j+= i)
+        is_prime[j] = false;
+  }
+}
+
+bool DFS(int a_idx){
+  if(a_idx == 0 || visited[a_idx])
+    return false;
+  visited[a_idx] = true;
+
+  for(int i=0; i<adj[a_idx].size() ; ++i){
+    int b_idx = adj[a_idx][i];
+
+    if(b_match[b_idx] == -1 || DFS(b_match[b_idx])){
+      a_match[a_idx] = b_idx;
+      b_match[b_idx] = a_idx;
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+
+int main(){
+  ios_base::sync_with_stdio(0);
+  cin>>arr_size;
+
+  int first_num;
+  cin>>first_num;
+
+  bool is_first_even;
+  is_first_even = first_num%2 ==0 ? true : false;
+  a_set.push_back(first_num);
+
+  int temp;
+  for(int i=1; i<arr_size ; ++i){
+    cin>>temp;
+
+    if(is_first_even){
+      if(temp %2 == 0)
+        a_set.push_back(temp);
+      else 
+        b_set.push_back(temp);
+    }else{
+      if(temp %2 != 0)
+        a_set.push_back(temp);
+      else 
+        b_set.push_back(temp);
+    }
+  }
+
+  if(b_set.size() != a_set.size()){
+    cout<<-1<<'\n';
+    return 0;
+  }
+
+  SieveEratos();
+
+  adj = vector<vector<int>>(a_set.size());
+  for(int i=0; i<a_set.size() ; ++i)
+    for(int j=0; j<b_set.size() ; ++j)
+      if(is_prime[a_set[i]+b_set[j]])
+        adj[i].push_back(j);
+
+
+  vector<int> answers;
+  for(int i=0; i<adj[0].size(); ++i){
+    int pair_b_idx = adj[0][i];
+    int paired_size =1;
+
+    a_match = vector<int>(a_set.size(), -1);
+    b_match = vector<int>(b_set.size(), -1);
+    
+    a_match[0] = pair_b_idx;
+    b_match[pair_b_idx] = 0;
+
+    for(int j =1 ; j<a_set.size() ; ++j){
+      visited = vector<int>(a_set.size(), false);
+      if(DFS(j))
+        paired_size++;
+    }
+
+    if(paired_size == b_set.size())
+      answers.push_back(b_set[pair_b_idx]);
+  }
+
+  if(answers.size() != 0){
+    sort(answers.begin(), answers.end());
+    for(int i=0; i<answers.size() ; ++i)
+      cout<<answers[i]<<' ';
+  }else
+    cout<<-1;
+  
+  cout<<'\n';
+  
+  return 0;
+}
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
